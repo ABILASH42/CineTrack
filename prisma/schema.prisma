@@ -1,0 +1,123 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model UserProfile {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  displayName String?
+  avatarUrl   String?
+  bio         String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Movie {
+  id               String            @id @default(uuid())
+  tmdbId           Int               @unique
+  imdbId           String?
+  title            String
+  originalTitle    String?
+  originalLanguage String?
+  overview         String?
+  tagline          String?
+  posterPath       String?
+  backdropPath     String?
+  releaseDate      DateTime?
+  runtime          Int?
+  tmdbRating       Float?
+  tmdbVoteCount    Int?
+  popularity       Float?
+  adult            Boolean           @default(false)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  genres           MovieGenre[]
+  userMovies       UserMovie[]
+  collectionMovies CollectionMovie[]
+  watchHistory     WatchHistory[]
+}
+
+model Genre {
+  id     String       @id @default(uuid())
+  tmdbId Int          @unique
+  name   String
+  movies MovieGenre[]
+}
+
+model MovieGenre {
+  movieId String
+  genreId String
+  movie   Movie  @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  genre   Genre  @relation(fields: [genreId], references: [id], onDelete: Cascade)
+
+  @@id([movieId, genreId])
+}
+
+model UserMovie {
+  id             String    @id @default(uuid())
+  userId         String
+  movieId        String
+  status         String    @default("PLAN_TO_WATCH")
+  personalRating Float?
+  review         String?
+  notes          String?
+  startedAt      DateTime?
+  completedAt    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  movie          Movie     @relation(fields: [movieId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, movieId])
+}
+
+model Collection {
+  id           String            @id @default(uuid())
+  userId       String
+  name         String
+  description  String?
+  coverMovieId String?
+  isPublic     Boolean           @default(false)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  movies       CollectionMovie[]
+}
+
+model CollectionMovie {
+  collectionId String
+  movieId      String
+  position     Int      @default(0)
+  addedAt      DateTime @default(now())
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  movie        Movie      @relation(fields: [movieId], references: [id], onDelete: Cascade)
+
+  @@id([collectionId, movieId])
+}
+
+model WatchHistory {
+  id                String   @id @default(uuid())
+  userId            String
+  movieId           String
+  ratingAtWatchTime Float?
+  watchedAt         DateTime @default(now())
+  note              String?
+  createdAt         DateTime @default(now())
+  movie             Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
+}
+
+model UserPreference {
+  id                      String   @id @default(uuid())
+  userId                  String   @unique
+  theme                   String   @default("dark")
+  preferredLanguage       String   @default("en")
+  preferredMovieLanguages String[] @default(["en"])
+  defaultSort             String   @default("RECENTLY_ADDED")
+  defaultView             String   @default("GRID")
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+}
