@@ -95,19 +95,24 @@ export async function updateMovieLibraryStatus(
 }
 
 export async function getUserMovieStatus(userId: string, tmdbId: number) {
-  const movie = await prisma.movie.findUnique({
-    where: { tmdbId }
-  })
-  if (!movie) return null
+  try {
+    const movie = await prisma.movie.findUnique({
+      where: { tmdbId }
+    })
+    if (!movie) return null
 
-  return await prisma.userMovie.findUnique({
-    where: {
-      userId_movieId: {
-        userId,
-        movieId: movie.id
+    return await prisma.userMovie.findUnique({
+      where: {
+        userId_movieId: {
+          userId,
+          movieId: movie.id
+        }
       }
-    }
-  })
+    })
+  } catch (error) {
+    console.error('Database query failed in getUserMovieStatus:', error)
+    return null
+  }
 }
 
 export async function getUserLibrary(userId: string, statusFilter?: string) {
@@ -116,31 +121,41 @@ export async function getUserLibrary(userId: string, statusFilter?: string) {
     whereClause.status = statusFilter
   }
 
-  return await prisma.userMovie.findMany({
-    where: whereClause,
-    include: {
-      movie: true
-    },
-    orderBy: {
-      updatedAt: 'desc'
-    }
-  })
+  try {
+    return await prisma.userMovie.findMany({
+      where: whereClause,
+      include: {
+        movie: true
+      },
+      orderBy: {
+        updatedAt: 'desc'
+      }
+    })
+  } catch (error) {
+    console.error('Database connection failed in getUserLibrary:', error)
+    return []
+  }
 }
 
 export async function getUserCollections(userId: string) {
-  return await prisma.collection.findMany({
-    where: { userId },
-    include: {
-      movies: {
-        include: {
-          movie: true
+  try {
+    return await prisma.collection.findMany({
+      where: { userId },
+      include: {
+        movies: {
+          include: {
+            movie: true
+          }
         }
+      },
+      orderBy: {
+        updatedAt: 'desc'
       }
-    },
-    orderBy: {
-      updatedAt: 'desc'
-    }
-  })
+    })
+  } catch (error) {
+    console.error('Database connection failed in getUserCollections:', error)
+    return []
+  }
 }
 
 export async function createCollection(userId: string, name: string, description?: string) {

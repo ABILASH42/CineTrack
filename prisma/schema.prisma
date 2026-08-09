@@ -1,11 +1,11 @@
+// SQLite local fallback datasource for development offline mode
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 model UserProfile {
@@ -115,7 +115,6 @@ model UserPreference {
   userId                  String   @unique
   theme                   String   @default("dark")
   preferredLanguage       String   @default("en")
-  preferredMovieLanguages String[] @default(["en"])
   defaultSort             String   @default("RECENTLY_ADDED")
   defaultView             String   @default("GRID")
   createdAt               DateTime @default(now())
