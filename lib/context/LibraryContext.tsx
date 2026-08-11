@@ -96,10 +96,11 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
 
       if (movies) setUserMovies(movies);
 
-      // Fetch User Collections
+      // Fetch User Collections (only own collections or public ones for current user)
       const { data: cols } = await supabase
         .from('collections')
         .select('*')
+        .eq('user_id', userId)
         .order('created_at', { ascending: false });
 
       if (cols) setCollections(cols);
@@ -144,10 +145,19 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
         .select()
         .single();
 
-      if (!error && data) {
-        const filtered = userMovies.filter((m) => m.tmdb_id !== movie.id);
-        setUserMovies([data, ...filtered]);
+      if (error) {
+        console.error('Error updating watchlist in Supabase:', error);
       }
+      
+      const newLog: UserMovieLog = data || {
+        id: existing?.id || `db-${Date.now()}`,
+        user_id: user.id,
+        ...payload,
+        created_at: existing?.created_at || now,
+      };
+
+      const filtered = userMovies.filter((m) => m.tmdb_id !== movie.id);
+      setUserMovies([newLog, ...filtered]);
     } else {
       // Guest mode
       const updatedLog: UserMovieLog = {
