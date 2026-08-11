@@ -3,10 +3,12 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Film, Compass, BookmarkCheck, Library, Search, User, Sparkles } from 'lucide-react';
+import { Film, Compass, BookmarkCheck, Library, Search, User, LogOut, Sparkles } from 'lucide-react';
+import { useLibrary } from '@/lib/context/LibraryContext';
 
 export function Navbar() {
   const pathname = usePathname();
+  const { user, profile, signOut } = useLibrary();
 
   const navItems = [
     { name: 'Discover', href: '/', icon: Compass },
@@ -58,29 +60,43 @@ export function Navbar() {
           })}
         </nav>
 
-        {/* Quick Search & User Profile Button */}
+        {/* User Auth Profile Buttons */}
         <div className="flex items-center gap-3">
-          <Link
-            href="/search"
-            className="md:hidden p-2.5 text-slate-300 hover:text-white hover:bg-white/10 rounded-full transition-colors"
-            aria-label="Search"
-          >
-            <Search className="w-5 h-5" />
-          </Link>
+          {user ? (
+            <div className="flex items-center gap-3">
+              <Link
+                href="/library"
+                className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900 border border-white/10 text-slate-200 text-xs font-semibold hover:border-rose-500/50 transition-all"
+              >
+                <div className="w-6 h-6 rounded-full bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-400 font-bold">
+                  {profile?.username ? profile.username[0].toUpperCase() : 'U'}
+                </div>
+                <span className="hidden sm:inline font-bold text-slate-100">
+                  {profile?.username || user.email?.split('@')[0]}
+                </span>
+              </Link>
 
-          <Link
-            href="/library"
-            className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-slate-800 to-slate-900 border border-slate-700 text-slate-200 text-sm font-semibold hover:border-rose-500/50 hover:text-white transition-all shadow-sm group"
-          >
-            <div className="w-7 h-7 rounded-full bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-400 group-hover:scale-105 transition-transform">
-              <User className="w-4 h-4" />
+              <button
+                onClick={() => signOut()}
+                className="p-2 rounded-full text-slate-400 hover:text-rose-400 hover:bg-white/10 transition-colors"
+                title="Sign Out"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
             </div>
-            <span className="hidden sm:inline">My Profile</span>
-          </Link>
+          ) : (
+            <Link
+              href="/login"
+              className="flex items-center gap-2 px-5 py-2 rounded-full bg-gradient-to-r from-rose-600 to-amber-600 text-white text-xs font-bold uppercase tracking-wider shadow-lg shadow-rose-600/30 hover:scale-105 transition-transform"
+            >
+              <User className="w-4 h-4" />
+              <span>Sign In</span>
+            </Link>
+          )}
         </div>
       </div>
 
-      {/* Mobile Bottom Navigation Bar */}
+      {/* Mobile Bottom Bar */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-slate-950/90 backdrop-blur-xl border-t border-white/10 px-4 py-2 flex items-center justify-around">
         {navItems.map((item) => {
           const Icon = item.icon;

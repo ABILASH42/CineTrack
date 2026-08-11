@@ -2,206 +2,220 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { UserMovieLog, Collection, WatchStatus, Movie } from '@/types/movie';
-import { MOCK_MOVIES } from '@/lib/tmdb';
+import { supabase } from '@/lib/supabase/client';
+import { User } from '@supabase/supabase-js';
+
+export interface UserProfile {
+  id: string;
+  username: string;
+  full_name: string | null;
+  avatar_url: string | null;
+}
 
 interface LibraryContextType {
+  user: User | null;
+  profile: UserProfile | null;
+  loadingAuth: boolean;
   userMovies: UserMovieLog[];
   collections: Collection[];
-  addOrUpdateMovieStatus: (movie: Movie, status: WatchStatus, rating?: number, review?: string) => void;
-  removeMovieLog: (tmdb_id: number) => void;
+  addOrUpdateMovieStatus: (movie: Movie, status: WatchStatus, rating?: number, review?: string) => Promise<void>;
+  removeMovieLog: (tmdb_id: number) => Promise<void>;
   getMovieLog: (tmdb_id: number) => UserMovieLog | undefined;
-  createCollection: (name: string, description?: string) => Collection;
-  addMovieToCollection: (collectionId: string, movie: Movie) => void;
-  isMovieInCollection: (collectionId: string, tmdb_id: number) => boolean;
+  createCollection: (name: string, description?: string) => Promise<Collection | null>;
+  addMovieToCollection: (collectionId: string, movie: Movie) => Promise<void>;
   getWatchStats: () => { totalWatched: number; totalMinutes: number; averageRating: number; planToWatchCount: number };
+  signOut: () => Promise<void>;
 }
 
 const LibraryContext = createContext<LibraryContextType | undefined>(undefined);
 
-const STORAGE_KEY_MOVIES = 'cinetrack_user_movies_v1';
-const STORAGE_KEY_COLLECTIONS = 'cinetrack_collections_v1';
-
-const INITIAL_COLLECTIONS: Collection[] = [
-  {
-    id: 'col-1',
-    user_id: 'local-user',
-    name: '🔥 Mind-Bending Masterpieces',
-    description: 'Psychological thrillers and sci-fi brain melters that require multiple viewings.',
-    is_public: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    posters: [
-      '/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg',
-      '/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg',
-      '/oYuLEW9WAFUh1A29agkq9BGDyGl.jpg'
-    ]
-  },
-  {
-    id: 'col-2',
-    user_id: 'local-user',
-    name: '🍿 Cozy Weekend Binge',
-    description: 'Comfort films for rainy Sundays and late night watch sessions with popcorn.',
-    is_public: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    posters: [
-      '/39wmItEPh1JuOVccExaADejEwJ.jpg',
-      '/qJ2tW6WMUDux911r6m7haRef0WH.jpg'
-    ]
-  }
-];
-
-const INITIAL_LOGS: UserMovieLog[] = [
-  {
-    id: 'log-1',
-    user_id: 'local-user',
-    tmdb_id: 550,
-    title: 'Fight Club',
-    poster_path: '/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg',
-    release_date: '1999-10-15',
-    runtime: 139,
-    status: 'completed',
-    rating: 9.5,
-    review: 'Absolute cinema. Fincher’s directing combined with Pitt & Norton is iconic.',
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  },
-  {
-    id: 'log-2',
-    user_id: 'local-user',
-    tmdb_id: 157336,
-    title: 'Interstellar',
-    poster_path: '/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg',
-    release_date: '2014-11-05',
-    runtime: 169,
-    status: 'completed',
-    rating: 10,
-    review: 'Hans Zimmer score paired with Nolan’s visuals left me speechless.',
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  },
-  {
-    id: 'log-3',
-    user_id: 'local-user',
-    tmdb_id: 27205,
-    title: 'Inception',
-    poster_path: '/oYuLEW9WAFUh1A29agkq9BGDyGl.jpg',
-    release_date: '2010-07-15',
-    runtime: 148,
-    status: 'plan_to_watch',
-    rating: null,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  }
-];
+const LOCAL_STORAGE_MOVIES = 'cinetrack_user_movies_guest';
+const LOCAL_STORAGE_COLLECTIONS = 'cinetrack_collections_guest';
 
 export function LibraryProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [loadingAuth, setLoadingAuth] = useState(true);
   const [userMovies, setUserMovies] = useState<UserMovieLog[]>([]);
   const [collections, setCollections] = useState<Collection[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
 
+  // 1. Monitor Supabase Auth state changes
   useEffect(() => {
-    try {
-      const savedMovies = localStorage.getItem(STORAGE_KEY_MOVIES);
-      const savedCols = localStorage.getItem(STORAGE_KEY_COLLECTIONS);
-
-      if (savedMovies) {
-        setUserMovies(JSON.parse(savedMovies));
+    async function getInitialSession() {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        await fetchUserProfile(session.user.id);
+        await fetchUserDataFromSupabase(session.user.id);
       } else {
-        setUserMovies(INITIAL_LOGS);
-        localStorage.setItem(STORAGE_KEY_MOVIES, JSON.stringify(INITIAL_LOGS));
+        loadGuestDataFromLocalStorage();
       }
-
-      if (savedCols) {
-        setCollections(JSON.parse(savedCols));
-      } else {
-        setCollections(INITIAL_COLLECTIONS);
-        localStorage.setItem(STORAGE_KEY_COLLECTIONS, JSON.stringify(INITIAL_COLLECTIONS));
-      }
-    } catch (e) {
-      console.error('Failed to load library state', e);
-    } finally {
-      setIsLoaded(true);
+      setLoadingAuth(false);
     }
+
+    getInitialSession();
+
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        await fetchUserProfile(session.user.id);
+        await fetchUserDataFromSupabase(session.user.id);
+      } else {
+        setProfile(null);
+        loadGuestDataFromLocalStorage();
+      }
+      setLoadingAuth(false);
+    });
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
   }, []);
 
-  const saveMoviesState = (movies: UserMovieLog[]) => {
-    setUserMovies(movies);
+  const fetchUserProfile = async (userId: string) => {
     try {
-      localStorage.setItem(STORAGE_KEY_MOVIES, JSON.stringify(movies));
+      const { data } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+      if (data) setProfile(data);
     } catch (e) {
-      console.error('Failed to save to localStorage', e);
+      console.error('Failed to fetch profile', e);
     }
   };
 
-  const saveCollectionsState = (cols: Collection[]) => {
-    setCollections(cols);
+  const fetchUserDataFromSupabase = async (userId: string) => {
     try {
-      localStorage.setItem(STORAGE_KEY_COLLECTIONS, JSON.stringify(cols));
+      // Fetch User Watchlist Movies
+      const { data: movies } = await supabase
+        .from('user_movies')
+        .select('*')
+        .eq('user_id', userId)
+        .order('updated_at', { ascending: false });
+
+      if (movies) setUserMovies(movies);
+
+      // Fetch User Collections
+      const { data: cols } = await supabase
+        .from('collections')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (cols) setCollections(cols);
     } catch (e) {
-      console.error('Failed to save collections', e);
+      console.error('Failed to fetch data from Supabase', e);
     }
   };
 
-  const addOrUpdateMovieStatus = (movie: Movie, status: WatchStatus, rating?: number, review?: string) => {
-    const existingIndex = userMovies.findIndex((m) => m.tmdb_id === movie.id);
+  const loadGuestDataFromLocalStorage = () => {
+    try {
+      const m = localStorage.getItem(LOCAL_STORAGE_MOVIES);
+      const c = localStorage.getItem(LOCAL_STORAGE_COLLECTIONS);
+      if (m) setUserMovies(JSON.parse(m));
+      else setUserMovies([]);
+      if (c) setCollections(JSON.parse(c));
+      else setCollections([]);
+    } catch (e) {
+      console.error('LocalStorage parse error', e);
+    }
+  };
+
+  const addOrUpdateMovieStatus = async (movie: Movie, status: WatchStatus, rating?: number, review?: string) => {
+    const existing = userMovies.find((m) => m.tmdb_id === movie.id);
     const now = new Date().toISOString();
 
-    if (existingIndex > -1) {
-      const updated = [...userMovies];
-      updated[existingIndex] = {
-        ...updated[existingIndex],
-        status,
-        rating: rating !== undefined ? rating : updated[existingIndex].rating,
-        review: review !== undefined ? review : updated[existingIndex].review,
-        updated_at: now,
-      };
-      saveMoviesState(updated);
+    const payload = {
+      tmdb_id: movie.id,
+      title: movie.title,
+      poster_path: movie.poster_path,
+      release_date: movie.release_date,
+      runtime: movie.runtime || 120,
+      status,
+      rating: rating !== undefined ? rating : (existing?.rating ?? null),
+      review: review !== undefined ? review : (existing?.review ?? null),
+      updated_at: now
+    };
+
+    if (user) {
+      const { data, error } = await supabase
+        .from('user_movies')
+        .upsert({ ...payload, user_id: user.id }, { onConflict: 'user_id,tmdb_id' })
+        .select()
+        .single();
+
+      if (!error && data) {
+        const filtered = userMovies.filter((m) => m.tmdb_id !== movie.id);
+        setUserMovies([data, ...filtered]);
+      }
     } else {
-      const newLog: UserMovieLog = {
-        id: `log-${Date.now()}`,
-        user_id: 'local-user',
-        tmdb_id: movie.id,
-        title: movie.title,
-        poster_path: movie.poster_path,
-        release_date: movie.release_date,
-        runtime: movie.runtime || 120,
-        status,
-        rating: rating ?? null,
-        review: review ?? null,
-        created_at: now,
-        updated_at: now,
+      // Guest mode
+      const updatedLog: UserMovieLog = {
+        id: `guest-${Date.now()}`,
+        user_id: 'guest',
+        ...payload,
+        created_at: existing?.created_at || now,
       };
-      saveMoviesState([newLog, ...userMovies]);
+      const filtered = userMovies.filter((m) => m.tmdb_id !== movie.id);
+      const nextList = [updatedLog, ...filtered];
+      setUserMovies(nextList);
+      localStorage.setItem(LOCAL_STORAGE_MOVIES, JSON.stringify(nextList));
     }
   };
 
-  const removeMovieLog = (tmdb_id: number) => {
+  const removeMovieLog = async (tmdb_id: number) => {
+    if (user) {
+      await supabase.from('user_movies').delete().eq('user_id', user.id).eq('tmdb_id', tmdb_id);
+    }
     const filtered = userMovies.filter((m) => m.tmdb_id !== tmdb_id);
-    saveMoviesState(filtered);
+    setUserMovies(filtered);
+    if (!user) localStorage.setItem(LOCAL_STORAGE_MOVIES, JSON.stringify(filtered));
   };
 
   const getMovieLog = (tmdb_id: number) => {
     return userMovies.find((m) => m.tmdb_id === tmdb_id);
   };
 
-  const createCollection = (name: string, description?: string) => {
-    const newCol: Collection = {
-      id: `col-${Date.now()}`,
-      user_id: 'local-user',
-      name,
-      description: description || null,
-      is_public: true,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      posters: []
-    };
-    const updated = [newCol, ...collections];
-    saveCollectionsState(updated);
-    return newCol;
+  const createCollection = async (name: string, description?: string): Promise<Collection | null> => {
+    const now = new Date().toISOString();
+
+    if (user) {
+      const { data, error } = await supabase
+        .from('collections')
+        .insert({
+          user_id: user.id,
+          name,
+          description: description || null,
+          is_public: true,
+          posters: []
+        })
+        .select()
+        .single();
+
+      if (!error && data) {
+        setCollections([data, ...collections]);
+        return data;
+      }
+    } else {
+      const newCol: Collection = {
+        id: `guest-col-${Date.now()}`,
+        user_id: 'guest',
+        name,
+        description: description || null,
+        is_public: true,
+        posters: [],
+        created_at: now,
+        updated_at: now
+      };
+      const updated = [newCol, ...collections];
+      setCollections(updated);
+      localStorage.setItem(LOCAL_STORAGE_COLLECTIONS, JSON.stringify(updated));
+      return newCol;
+    }
+    return null;
   };
 
-  const addMovieToCollection = (collectionId: string, movie: Movie) => {
+  const addMovieToCollection = async (collectionId: string, movie: Movie) => {
     const colIndex = collections.findIndex((c) => c.id === collectionId);
     if (colIndex === -1) return;
 
@@ -211,26 +225,26 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
       posters.unshift(movie.poster_path);
     }
 
-    const updated = [...collections];
-    updated[colIndex] = {
-      ...col,
-      posters: posters.slice(0, 4),
-      updated_at: new Date().toISOString()
-    };
-    saveCollectionsState(updated);
-  };
+    const nextPosters = posters.slice(0, 4);
 
-  const isMovieInCollection = (collectionId: string, tmdb_id: number) => {
-    const col = collections.find((c) => c.id === collectionId);
-    if (!col || !col.posters) return false;
-    return false; // Dynamic checking fallback
+    if (user && !collectionId.startsWith('guest')) {
+      await supabase
+        .from('collections')
+        .update({ posters: nextPosters, updated_at: new Date().toISOString() })
+        .eq('id', collectionId);
+    }
+
+    const updated = [...collections];
+    updated[colIndex] = { ...col, posters: nextPosters, updated_at: new Date().toISOString() };
+    setCollections(updated);
+    if (!user) localStorage.setItem(LOCAL_STORAGE_COLLECTIONS, JSON.stringify(updated));
   };
 
   const getWatchStats = () => {
     const watched = userMovies.filter((m) => m.status === 'completed');
     const totalWatched = watched.length;
     const totalMinutes = watched.reduce((acc, curr) => acc + (curr.runtime || 120), 0);
-    const ratedMovies = watched.filter((m) => m.rating !== null && m.rating > 0);
+    const ratedMovies = watched.filter((m) => m.rating !== null && (m.rating || 0) > 0);
     const averageRating = ratedMovies.length
       ? Number((ratedMovies.reduce((acc, curr) => acc + (curr.rating || 0), 0) / ratedMovies.length).toFixed(1))
       : 0;
@@ -239,9 +253,19 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
     return { totalWatched, totalMinutes, averageRating, planToWatchCount };
   };
 
+  const signOut = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    setProfile(null);
+    loadGuestDataFromLocalStorage();
+  };
+
   return (
     <LibraryContext.Provider
       value={{
+        user,
+        profile,
+        loadingAuth,
         userMovies,
         collections,
         addOrUpdateMovieStatus,
@@ -249,8 +273,8 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
         getMovieLog,
         createCollection,
         addMovieToCollection,
-        isMovieInCollection,
         getWatchStats,
+        signOut,
       }}
     >
       {children}
