@@ -53,6 +53,7 @@ export function MovieModal({ movieId, onClose }: MovieModalProps) {
     addOrUpdateMovieStatus(movie, status, userRating || undefined, userReview || undefined);
 
     if (status === 'completed') {
+      setActiveTab('log'); // Automatically open rating & review tab for user prompt
       confetti({
         particleCount: 70,
         spread: 60,
@@ -62,8 +63,9 @@ export function MovieModal({ movieId, onClose }: MovieModalProps) {
   };
 
   const handleSaveReview = () => {
-    if (!movie || !existingLog?.status) return;
-    addOrUpdateMovieStatus(movie, existingLog.status, userRating, userReview);
+    if (!movie) return;
+    const targetStatus = existingLog?.status || 'completed';
+    addOrUpdateMovieStatus(movie, targetStatus, userRating, userReview);
   };
 
   const handleAddToCollection = (colId: string) => {
