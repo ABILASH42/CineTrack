@@ -62,6 +62,14 @@ export function MovieModal({ movieId, onClose }: MovieModalProps) {
     }
   };
 
+  const handleStarClick = (star: number) => {
+    setUserRating(star);
+    if (movie) {
+      const targetStatus = existingLog?.status || 'completed';
+      addOrUpdateMovieStatus(movie, targetStatus, star, userReview);
+    }
+  };
+
   const handleSaveReview = () => {
     if (!movie) return;
     const targetStatus = existingLog?.status || 'completed';
@@ -323,7 +331,7 @@ export function MovieModal({ movieId, onClose }: MovieModalProps) {
                       {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((star) => (
                         <button
                           key={star}
-                          onClick={() => setUserRating(star)}
+                          onClick={() => handleStarClick(star)}
                           className={`p-1.5 rounded-lg transition-all ${
                             star <= userRating
                               ? 'text-amber-400 scale-110'
