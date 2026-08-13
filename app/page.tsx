@@ -208,33 +208,6 @@ export default function HomePage() {
 
       {/* Main Content Layout */}
       <main className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mt-6 sm:mt-10 space-y-10 sm:space-y-14">
-        
-        {/* Category Quick Navigation Bar */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar border-b border-white/10">
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-400 shrink-0 flex items-center gap-1 mr-1">
-            <Compass className="w-3.5 h-3.5 text-rose-500" /> Categories:
-          </span>
-          {[
-            { id: 'trending', label: 'Trending', icon: Flame },
-            { id: 'popular', label: 'Fan Favorites', icon: Trophy },
-            { id: 'comedy', label: 'Comedy', icon: Laugh },
-            { id: 'romance', label: 'Romance', icon: Heart },
-            { id: 'action', label: 'Action & Thrillers', icon: ShieldAlert },
-            { id: 'scifi', label: 'Sci-Fi & Cyberpunk', icon: Rocket },
-          ].map((cat) => {
-            const Icon = cat.icon;
-            return (
-              <button
-                key={cat.id}
-                onClick={() => scrollToSection(cat.id)}
-                className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/5 hover:bg-rose-600/20 text-slate-300 hover:text-rose-300 border border-white/10 transition-all shrink-0 flex items-center gap-1.5 active:scale-95"
-              >
-                <Icon className="w-3.5 h-3.5 text-rose-400" />
-                <span>{cat.label}</span>
-              </button>
-            );
-          })}
-        </div>
 
         {/* Section 1: Trending Now Grid */}
         <section id="trending" className="space-y-4 sm:space-y-6 scroll-mt-24">
