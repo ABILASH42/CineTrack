@@ -23,17 +23,23 @@ export function Navbar() {
         
         {/* Brand Logo */}
         <Link href="/" className="flex items-center gap-2.5 sm:gap-3 group">
-          <div className="relative flex items-center justify-center w-9 h-9 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-amber-500 via-rose-600 to-indigo-600 p-[2px] shadow-lg shadow-rose-500/20 group-hover:scale-105 transition-transform duration-300">
-            <div className="w-full h-full bg-slate-950 rounded-[10px] sm:rounded-[14px] flex items-center justify-center">
-              <Film className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400 group-hover:rotate-12 transition-transform duration-300" />
+          <div className="relative flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-rose-600 via-rose-500 to-amber-500 p-[1.5px] shadow-lg shadow-rose-600/25 group-hover:shadow-rose-600/40 group-hover:scale-105 transition-all duration-300">
+            <div className="w-full h-full bg-slate-950 rounded-[10.5px] flex items-center justify-center relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-rose-500/20 to-amber-500/10 group-hover:opacity-100 transition-opacity" />
+              <svg className="w-5 h-5 text-rose-500 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                <path d="M3 9H21" stroke="currentColor" strokeWidth="1.5" strokeOpacity="0.4" strokeDasharray="2 2" />
+                <path d="M3 15H21" stroke="currentColor" strokeWidth="1.5" strokeOpacity="0.4" strokeDasharray="2 2" />
+                <polygon points="10,8 16,12 10,16" fill="#F59E0B" />
+              </svg>
             </div>
           </div>
-          <div className="flex flex-col">
-            <span className="font-extrabold text-lg sm:text-2xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-200 to-slate-400">
-              Cine<span className="text-rose-500">Track</span>
+          <div className="flex flex-col justify-center">
+            <span className="font-black text-lg sm:text-xl tracking-tight text-white flex items-center gap-0.5">
+              CINE<span className="text-rose-500 font-black">TRACK</span>
             </span>
-            <span className="hidden xs:flex text-[9px] sm:text-[10px] tracking-widest uppercase font-semibold text-rose-400/80 -mt-0.5 sm:-mt-1 items-center gap-1">
-              <Sparkles className="w-2.5 h-2.5" /> Crunchyroll for Movies
+            <span className="hidden xs:block text-[9px] tracking-[0.2em] uppercase font-bold text-slate-400 -mt-0.5">
+              CINEMA LOG
             </span>
           </div>
         </Link>

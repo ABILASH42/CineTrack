@@ -1,0 +1,20 @@
+# CineTrack - Cinema Tracker & Movie Discovery
+
+> CineTrack is a modern, high-performance web application designed for movie lovers to discover trending titles, track personal watchlists, rate films, and curate custom movie collections.
+
+## Core Capabilities
+- **Featured Spotlight Carousel**: Top-5 trending movies of the week with interactive auto-advancing banner.
+- **Real-Time Movie Discovery**: Search and discover movies powered by TMDB metadata, posters, and trailers.
+- **Personal Watchlist & Library**: Track status ("Plan to Watch", "Watching", "Completed"), log 1-10 star ratings, and write personal reviews.
+- **Custom Collections**: Create and organize custom movie lists.
+- **Multi-User Sync & Offline Guest Mode**: Real-time cloud sync via Supabase Auth & PostgreSQL, with local storage fallback for instant guest access.
+
+## Target Audience & Use Cases
+- Film enthusiasts seeking a clean, fast alternative for tracking watched movies and watchlists.
+- Users looking to curate custom collections and discover trending releases.
+
+## Website Architecture & Key Routes
+- `/`: Featured Spotlight, Trending Now, and Popular Releases.
+- `/search`: Real-time movie search engine.
+- `/library`: Personal movie watchlist & rating library.
+- `/collections`: User-created movie collections.
