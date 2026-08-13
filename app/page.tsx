@@ -50,40 +50,41 @@ export default function HomePage() {
     <div className="min-h-screen pb-28 sm:pb-20">
       {/* Hero Showcase Section */}
       {heroMovie && (
-        <section className="relative w-full min-h-[420px] sm:min-h-[500px] sm:h-[80vh] flex items-end overflow-hidden bg-slate-950">
+        <section className="relative w-full min-h-[440px] sm:min-h-[520px] lg:h-[82vh] flex items-end overflow-hidden bg-slate-950">
+          {/* Backdrop Image */}
           <Image
             src={getTMDBImageUrl(heroMovie.backdrop_path || heroMovie.poster_path, 'original')}
             alt={heroMovie.title}
             fill
             priority
             sizes="100vw"
-            className="object-cover opacity-50 scale-105 filter brightness-90 animate-fadeIn"
+            className="object-cover opacity-75 sm:opacity-85 scale-105 filter brightness-100 animate-fadeIn"
           />
 
-          {/* Vignette Gradients */}
+          {/* Vignette Gradients for Legibility */}
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/50 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/70 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/80 to-transparent md:w-3/4 lg:w-2/3" />
 
           {/* Hero Content Overlay */}
-          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:pb-16 w-full">
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:pb-16 w-full flex items-end justify-between gap-8">
             <div className="max-w-2xl space-y-3 sm:space-y-4">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/20 border border-rose-500/30 text-rose-300 text-[10px] sm:text-xs font-bold tracking-wider uppercase backdrop-blur-md">
-                <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> Featured Spotlight
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/20 border border-rose-500/30 text-rose-300 text-[10px] sm:text-xs font-bold tracking-wider uppercase backdrop-blur-md shadow-md">
+                <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-rose-400" /> Featured Spotlight
               </div>
 
-              <h1 className="text-2xl xs:text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-tight sm:leading-none drop-shadow-lg">
+              <h1 className="text-2xl xs:text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-tight sm:leading-none drop-shadow-xl">
                 {heroMovie.title}
               </h1>
 
               <div className="flex items-center gap-3 text-xs font-bold text-slate-300">
-                <span className="flex items-center gap-1 text-amber-400 bg-amber-400/10 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md border border-amber-400/20">
+                <span className="flex items-center gap-1 text-amber-400 bg-amber-400/10 px-2.5 py-1 rounded-md border border-amber-400/20 backdrop-blur-md">
                   <Star className="w-3.5 h-3.5 fill-amber-400" />
                   {heroMovie.vote_average?.toFixed(1)} / 10
                 </span>
                 <span>{heroMovie.release_date ? heroMovie.release_date.split('-')[0] : ''}</span>
               </div>
 
-              <p className="text-xs sm:text-base text-slate-300 line-clamp-2 sm:line-clamp-3 leading-relaxed drop-shadow">
+              <p className="text-xs sm:text-base text-slate-300 line-clamp-2 sm:line-clamp-3 leading-relaxed drop-shadow-md max-w-xl">
                 {heroMovie.overview}
               </p>
 
