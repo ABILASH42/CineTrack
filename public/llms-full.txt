@@ -1,0 +1,37 @@
+# CineTrack Technical Specification & AI Knowledge Base
+
+## Overview
+CineTrack is a full-stack Next.js 16 application engineered for movie tracking and catalog management.
+
+## Application Architecture
+- **Framework**: Next.js 16 (App Router, Turbopack)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS with dark slate theme, custom glassmorphism, and responsive design
+- **Database / Auth**: Supabase (PostgreSQL, Row Level Security, Auth) with localStorage fallback
+- **Movie Data API**: The Movie Database (TMDB) API (v3)
+
+## Complete Route Documentation
+
+### 1. Discover (`/`)
+- **Hero Spotlight**: 6-second auto-advancing carousel showcasing top 5 trending movies.
+- **Category Rows**: 10-item previews for Trending, Popular, Comedy, Romance, Action, Sci-Fi.
+- **Section Headers**: Direct "View More" navigation to dedicated genre routes.
+
+### 2. Search Engine (`/search`)
+- **Query Search**: Debounced real-time TMDB search.
+- **Genre Filters**: Filter pills for Action (28), Comedy (35), Romance (10749), Sci-Fi (878), Horror (27), Drama (18), Animation (16).
+- **Sort Options**: Popularity, Highest Rated, Newest Release.
+- **Infinite Scroll**: Auto-paginating IntersectionObserver infinite scroll.
+
+### 3. Personal Library (`/library`)
+- **Watch Status Tabs**: Watched, Plan to Watch, Watching, All Saved.
+- **Stats Overview**: Total watched count, watch time in hours, mean rating, plan to watch count.
+- **Library Search & Filters**: Title search, Star rating filters (9+, 7+, 5+, Unrated), and sorting (Recently Updated, Rating, Title).
+
+### 4. Custom Collections (`/collections` and `/collections/[id]`)
+- Create, rename, delete custom movie lists.
+- Add movies directly from detail modals.
+- Real-time search and sorting.
+
+### 5. Genre Catalogs (`/genre/[id]`)
+- Infinite scroll paginated catalog for any TMDB genre or category ID.
