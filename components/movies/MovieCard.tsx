@@ -120,7 +120,7 @@ export function MovieCard({ movie, onSelect }: MovieCardProps) {
             <span>{movie.release_date ? movie.release_date.split('-')[0] : 'TBA'}</span>
             {log?.rating ? (
               <span className="text-rose-400 font-bold flex items-center gap-0.5 bg-rose-500/10 px-1.5 py-0.5 rounded-md border border-rose-500/20 text-[10px] sm:text-xs shrink-0" title="Your Rating">
-                <span className="text-[9px] uppercase tracking-wider text-rose-300 font-extrabold">My:</span> ★ {log.rating}/10
+                ★ {log.rating}/10
               </span>
             ) : null}
           </div>
