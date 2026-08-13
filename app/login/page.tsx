@@ -1,13 +1,16 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
-import { Film, Sparkles, Mail, Lock, User, AlertCircle, ArrowRight } from 'lucide-react';
+import { Film, Sparkles, Mail, Lock, User, AlertCircle, ArrowRight, Info } from 'lucide-react';
 
-export default function LoginPage() {
+function LoginFormContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const noticeMsg = searchParams.get('message');
+
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -72,6 +75,13 @@ export default function LoginPage() {
               : 'Sign in to access your personal movie library & collections.'}
           </p>
         </div>
+
+        {noticeMsg && (
+          <div className="p-3.5 rounded-2xl bg-amber-500/15 border border-amber-500/40 text-amber-300 text-xs font-semibold flex items-center gap-2.5 shadow-lg shadow-amber-500/10">
+            <Info className="w-4 h-4 text-amber-400 shrink-0 animate-pulse" />
+            <span>{noticeMsg}</span>
+          </div>
+        )}
 
         {errorMsg && (
           <div className="p-3 sm:p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-semibold flex items-center gap-2.5">
@@ -151,5 +161,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-[80vh] flex items-center justify-center text-slate-400 text-xs">Loading...</div>}>
+      <LoginFormContent />
+    </Suspense>
   );
 }

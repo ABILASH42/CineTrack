@@ -110,19 +110,22 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
   };
 
   const loadGuestDataFromLocalStorage = () => {
+    setUserMovies([]);
+    setCollections([]);
     try {
-      const m = localStorage.getItem(LOCAL_STORAGE_MOVIES);
-      const c = localStorage.getItem(LOCAL_STORAGE_COLLECTIONS);
-      if (m) setUserMovies(JSON.parse(m));
-      else setUserMovies([]);
-      if (c) setCollections(JSON.parse(c));
-      else setCollections([]);
+      localStorage.removeItem(LOCAL_STORAGE_MOVIES);
+      localStorage.removeItem(LOCAL_STORAGE_COLLECTIONS);
     } catch (e) {
-      console.error('LocalStorage parse error', e);
+      console.error('Failed to clear guest storage', e);
     }
   };
 
   const addOrUpdateMovieStatus = async (movie: Movie, status: WatchStatus, rating?: number, review?: string) => {
+    if (!user) {
+      window.location.href = `/login?message=${encodeURIComponent('Please sign in to add movies to your watchlist, rate films, or leave reviews.')}`;
+      return;
+    }
+
     const existing = userMovies.find((m) => m.tmdb_id === movie.id);
     const now = new Date().toISOString();
 
@@ -140,63 +143,50 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
       updated_at: now
     };
 
-    if (user) {
-      let { data, error } = await supabase
+    let { data, error } = await supabase
+      .from('user_movies')
+      .upsert({ ...payload, user_id: user.id }, { onConflict: 'user_id,tmdb_id' })
+      .select()
+      .single();
+
+    if (error) {
+      // Fallback for Supabase tables missing newly added overview / vote_average columns
+      const { tmdb_id, title, poster_path, release_date, runtime, status, rating, review, updated_at } = payload;
+      const fallbackPayload = { tmdb_id, title, poster_path, release_date, runtime, status, rating, review, updated_at, user_id: user.id };
+      const res = await supabase
         .from('user_movies')
-        .upsert({ ...payload, user_id: user.id }, { onConflict: 'user_id,tmdb_id' })
+        .upsert(fallbackPayload, { onConflict: 'user_id,tmdb_id' })
         .select()
         .single();
 
-      if (error) {
-        // Fallback for Supabase tables missing newly added overview / vote_average columns
-        const { tmdb_id, title, poster_path, release_date, runtime, status, rating, review, updated_at } = payload;
-        const fallbackPayload = { tmdb_id, title, poster_path, release_date, runtime, status, rating, review, updated_at, user_id: user.id };
-        const res = await supabase
-          .from('user_movies')
-          .upsert(fallbackPayload, { onConflict: 'user_id,tmdb_id' })
-          .select()
-          .single();
-
-        if (res.data) {
-          data = res.data;
-          error = null;
-        } else if (res.error) {
-          console.error('Error updating watchlist in Supabase:', res.error.message || res.error);
-        }
+      if (res.data) {
+        data = res.data;
+        error = null;
+      } else if (res.error) {
+        console.error('Error updating watchlist in Supabase:', res.error.message || res.error);
       }
-
-      const newLog: UserMovieLog = {
-        id: data?.id || existing?.id || `db-${Date.now()}`,
-        user_id: user.id,
-        ...payload,
-        ...(data || {}),
-        created_at: existing?.created_at || now,
-      };
-
-      const filtered = userMovies.filter((m) => m.tmdb_id !== movie.id);
-      setUserMovies([newLog, ...filtered]);
-    } else {
-      // Guest mode
-      const updatedLog: UserMovieLog = {
-        id: `guest-${Date.now()}`,
-        user_id: 'guest',
-        ...payload,
-        created_at: existing?.created_at || now,
-      };
-      const filtered = userMovies.filter((m) => m.tmdb_id !== movie.id);
-      const nextList = [updatedLog, ...filtered];
-      setUserMovies(nextList);
-      localStorage.setItem(LOCAL_STORAGE_MOVIES, JSON.stringify(nextList));
     }
+
+    const newLog: UserMovieLog = {
+      id: data?.id || existing?.id || `db-${Date.now()}`,
+      user_id: user.id,
+      ...payload,
+      ...(data || {}),
+      created_at: existing?.created_at || now,
+    };
+
+    const filtered = userMovies.filter((m) => m.tmdb_id !== movie.id);
+    setUserMovies([newLog, ...filtered]);
   };
 
   const removeMovieLog = async (tmdb_id: number) => {
-    if (user) {
-      await supabase.from('user_movies').delete().eq('user_id', user.id).eq('tmdb_id', tmdb_id);
+    if (!user) {
+      window.location.href = `/login?message=${encodeURIComponent('Please sign in to manage your watchlist.')}`;
+      return;
     }
+    await supabase.from('user_movies').delete().eq('user_id', user.id).eq('tmdb_id', tmdb_id);
     const filtered = userMovies.filter((m) => m.tmdb_id !== tmdb_id);
     setUserMovies(filtered);
-    if (!user) localStorage.setItem(LOCAL_STORAGE_MOVIES, JSON.stringify(filtered));
   };
 
   const getMovieLog = (tmdb_id: number) => {
@@ -204,45 +194,36 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
   };
 
   const createCollection = async (name: string, description?: string): Promise<Collection | null> => {
-    const now = new Date().toISOString();
+    if (!user) {
+      window.location.href = `/login?message=${encodeURIComponent('Please sign in to create custom collections.')}`;
+      return null;
+    }
 
-    if (user) {
-      const { data, error } = await supabase
-        .from('collections')
-        .insert({
-          user_id: user.id,
-          name,
-          description: description || null,
-          is_public: true,
-          posters: []
-        })
-        .select()
-        .single();
-
-      if (!error && data) {
-        setCollections([data, ...collections]);
-        return data;
-      }
-    } else {
-      const newCol: Collection = {
-        id: `guest-col-${Date.now()}`,
-        user_id: 'guest',
+    const { data, error } = await supabase
+      .from('collections')
+      .insert({
+        user_id: user.id,
         name,
         description: description || null,
         is_public: true,
-        posters: [],
-        created_at: now,
-        updated_at: now
-      };
-      const updated = [newCol, ...collections];
-      setCollections(updated);
-      localStorage.setItem(LOCAL_STORAGE_COLLECTIONS, JSON.stringify(updated));
-      return newCol;
+        posters: []
+      })
+      .select()
+      .single();
+
+    if (!error && data) {
+      setCollections([data, ...collections]);
+      return data;
     }
     return null;
   };
 
   const addMovieToCollection = async (collectionId: string, movie: Movie) => {
+    if (!user) {
+      window.location.href = `/login?message=${encodeURIComponent('Please sign in to add movies to collections.')}`;
+      return;
+    }
+
     const colIndex = collections.findIndex((c) => c.id === collectionId);
     if (colIndex === -1) return;
 
