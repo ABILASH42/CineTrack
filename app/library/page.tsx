@@ -61,7 +61,7 @@ export default function LibraryPage() {
   });
 
   return (
-    <div className="min-h-screen py-6 sm:py-10 pb-28 sm:pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-10">
+    <div className="min-h-screen pt-20 sm:pt-28 pb-28 sm:pb-16 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-10">
       
       {/* Profile Header & Watch Stats Overview */}
       <div className="relative p-5 sm:p-10 rounded-3xl bg-slate-900/80 border border-white/10 overflow-hidden shadow-2xl backdrop-blur-xl">

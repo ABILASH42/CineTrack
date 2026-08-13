@@ -129,7 +129,7 @@ export default function SearchPage() {
   });
 
   return (
-    <div className="min-h-screen py-6 sm:py-10 pb-28 sm:pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-8">
+    <div className="min-h-screen pt-20 sm:pt-28 pb-28 sm:pb-16 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-8">
       
       {/* Header Banner */}
       <div className="space-y-2 sm:space-y-4 text-center max-w-2xl mx-auto">

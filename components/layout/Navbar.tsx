@@ -1,14 +1,28 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Film, Compass, BookmarkCheck, Library, Search, User, LogOut, Sparkles } from 'lucide-react';
+import { Compass, BookmarkCheck, Library, Search, User, LogOut } from 'lucide-react';
 import { useLibrary } from '@/lib/context/LibraryContext';
 
 export function Navbar() {
   const pathname = usePathname();
   const { user, profile, signOut } = useLibrary();
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 20) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+    handleScroll();
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const navItems = [
     { name: 'Discover', href: '/', icon: Compass },
@@ -18,8 +32,14 @@ export function Navbar() {
   ];
 
   return (
-    <header className="sticky top-0 z-40 w-full backdrop-blur-xl bg-black/70 border-b border-white/10 transition-all duration-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between">
+    <header
+      className={`fixed top-0 z-50 w-full transition-all duration-500 ${
+        isScrolled
+          ? 'bg-slate-950/85 backdrop-blur-xl border-b border-white/10 shadow-2xl py-0'
+          : 'bg-gradient-to-b from-slate-950/80 via-slate-950/30 to-transparent border-b-0 border-transparent shadow-none py-1.5 sm:py-2'
+      }`}
+    >
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between">
         
         {/* Brand Logo */}
         <Link href="/" className="flex items-center gap-2.5 sm:gap-3 group">
@@ -35,7 +55,7 @@ export function Navbar() {
             </div>
           </div>
           <div className="flex flex-col justify-center">
-            <span className="font-black text-lg sm:text-xl tracking-tight text-white flex items-center gap-0.5">
+            <span className="font-black text-lg sm:text-xl tracking-tight text-white flex items-center gap-0.5 drop-shadow-md">
               CINE<span className="text-rose-500 font-black">TRACK</span>
             </span>
             <span className="hidden xs:block text-[9px] tracking-[0.2em] uppercase font-bold text-slate-400 -mt-0.5">
@@ -45,7 +65,9 @@ export function Navbar() {
         </Link>
 
         {/* Navigation Links (Desktop) */}
-        <nav className="hidden md:flex items-center gap-1 bg-white/5 border border-white/10 rounded-full p-1.5 backdrop-blur-md">
+        <nav className={`hidden md:flex items-center gap-1 border rounded-full p-1.5 transition-all backdrop-blur-xl ${
+          isScrolled ? 'bg-white/5 border-white/10' : 'bg-black/50 border-white/15 shadow-xl'
+        }`}>
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
@@ -55,11 +77,11 @@ export function Navbar() {
                 href={item.href}
                 className={`flex items-center gap-2 px-4 lg:px-5 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
                   isActive
-                    ? 'bg-gradient-to-r from-rose-600 to-amber-600 text-white shadow-md shadow-rose-600/30'
-                    : 'text-slate-300 hover:text-white hover:bg-white/10'
+                    ? 'bg-gradient-to-r from-rose-600 to-amber-600 text-white shadow-md shadow-rose-600/30 font-bold'
+                    : 'text-slate-200 hover:text-white hover:bg-white/10'
                 }`}
               >
-                <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-300'}`} />
                 {item.name}
               </Link>
             );
@@ -72,7 +94,9 @@ export function Navbar() {
             <div className="flex items-center gap-2 sm:gap-3">
               <Link
                 href="/library"
-                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900 border border-white/10 text-slate-200 text-xs font-semibold hover:border-rose-500/50 active:scale-95 transition-all"
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-slate-200 text-xs font-semibold hover:border-rose-500/50 active:scale-95 transition-all backdrop-blur-xl ${
+                  isScrolled ? 'bg-slate-900 border-white/10' : 'bg-black/50 border-white/15 shadow-lg'
+                }`}
               >
                 <div className="w-6 h-6 rounded-full bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-400 font-bold text-xs">
                   {profile?.username ? profile.username[0].toUpperCase() : 'U'}

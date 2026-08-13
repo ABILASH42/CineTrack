@@ -92,9 +92,9 @@ export default function HomePage() {
         <section
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
-          className="relative w-full min-h-[560px] sm:min-h-[600px] lg:h-[82vh] pt-20 sm:pt-24 pb-16 sm:pb-20 flex items-end overflow-hidden bg-slate-950 group/hero"
+          className="relative w-full h-screen min-h-[600px] pt-24 sm:pt-28 pb-10 sm:pb-14 flex items-end overflow-hidden bg-slate-950 group/hero"
         >
-          {/* Vibrant Backdrop Image with Top Subject Framing */}
+          {/* Vibrant Full-Screen Backdrop Image */}
           <Image
             key={heroMovie.id}
             src={getTMDBImageUrl(heroMovie.backdrop_path || heroMovie.poster_path, 'original')}
@@ -102,18 +102,18 @@ export default function HomePage() {
             fill
             priority
             sizes="100vw"
-            className="object-cover object-top sm:object-[center_20%] opacity-90 sm:opacity-95 filter brightness-105 contrast-105 transition-opacity duration-700 animate-fadeIn"
+            className="object-cover object-[center_25%] opacity-90 sm:opacity-95 filter brightness-105 contrast-105 transition-opacity duration-700 animate-fadeIn"
           />
 
           {/* Clean, Non-Muddy Gradient Vignettes */}
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-slate-950/20 to-transparent max-w-2xl" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-slate-950/20 to-transparent max-w-3xl" />
 
-          {/* Hero Content Overlay */}
-          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex items-end justify-between gap-8 pb-2 sm:pb-4">
-            <div key={heroMovie.id} className="max-w-2xl space-y-3 sm:space-y-4 animate-fadeIn">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/20 border border-rose-500/30 text-rose-300 text-[10px] sm:text-xs font-bold tracking-wider uppercase backdrop-blur-md shadow-md">
-                <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-rose-400" /> Featured Spotlight #{heroIndex + 1}
+          {/* Hero Content Overlay with Baseline Aligned Carousel Controls */}
+          <div className="relative z-10 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 w-full flex flex-col md:flex-row md:items-end justify-between gap-6 pb-4 sm:pb-6">
+            <div key={heroMovie.id} className="max-w-3xl space-y-2.5 sm:space-y-3.5 animate-fadeIn">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-900/85 border border-rose-500/40 text-rose-400 text-[10px] sm:text-xs font-extrabold tracking-widest uppercase backdrop-blur-xl shadow-lg">
+                <Sparkles className="w-3.5 h-3.5 text-rose-500 animate-pulse" /> FEATURED SPOTLIGHT
               </div>
 
               <h1 className="text-2xl xs:text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]">
@@ -164,50 +164,50 @@ export default function HomePage() {
                 </button>
               </div>
             </div>
-          </div>
 
-          {/* Crunchyroll-style Bottom Slider Navigation Bar */}
-          {topHeroMovies.length > 1 && (
-            <div className="absolute bottom-3 right-4 sm:bottom-6 sm:right-6 z-20 flex items-center gap-1.5 sm:gap-2 bg-black/75 backdrop-blur-xl p-1.5 sm:p-2 rounded-2xl border border-white/15 shadow-2xl">
-              <button
-                onClick={handlePrevSlide}
-                className="p-1.5 rounded-xl hover:bg-white/20 text-white transition-colors active:scale-95"
-                title="Previous Featured Movie"
-              >
-                <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-              </button>
+            {/* Crunchyroll-style Bottom Slider Navigation Bar aligned on same bottom baseline */}
+            {topHeroMovies.length > 1 && (
+              <div className="shrink-0 flex items-center gap-1.5 sm:gap-2 bg-black/75 backdrop-blur-xl p-1.5 sm:p-2 rounded-2xl border border-white/15 shadow-2xl self-start md:self-end">
+                <button
+                  onClick={handlePrevSlide}
+                  className="p-1.5 rounded-xl hover:bg-white/20 text-white transition-colors active:scale-95"
+                  title="Previous Featured Movie"
+                >
+                  <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+                </button>
 
-              <div className="flex items-center gap-1 sm:gap-1.5 px-1">
-                {topHeroMovies.map((movie, idx) => (
-                  <button
-                    key={movie.id}
-                    onClick={() => setHeroIndex(idx)}
-                    className={`transition-all flex items-center justify-center rounded-xl w-7 h-7 sm:w-8 sm:h-8 text-[10px] sm:text-xs font-bold active:scale-95 ${
-                      idx === heroIndex
-                        ? 'bg-rose-600 text-white shadow-lg shadow-rose-600/40 ring-1 ring-white/30'
-                        : 'bg-white/10 hover:bg-white/20 text-slate-300'
-                    }`}
-                    title={movie.title}
-                  >
-                    0{idx + 1}
-                  </button>
-                ))}
+                <div className="flex items-center gap-1 sm:gap-1.5 px-1">
+                  {topHeroMovies.map((movie, idx) => (
+                    <button
+                      key={movie.id}
+                      onClick={() => setHeroIndex(idx)}
+                      className={`transition-all flex items-center justify-center rounded-xl w-7 h-7 sm:w-8 sm:h-8 text-[10px] sm:text-xs font-bold active:scale-95 ${
+                        idx === heroIndex
+                          ? 'bg-rose-600 text-white shadow-lg shadow-rose-600/40 ring-1 ring-white/30'
+                          : 'bg-white/10 hover:bg-white/20 text-slate-300'
+                      }`}
+                      title={movie.title}
+                    >
+                      0{idx + 1}
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  onClick={handleNextSlide}
+                  className="p-1.5 rounded-xl hover:bg-white/20 text-white transition-colors active:scale-95"
+                  title="Next Featured Movie"
+                >
+                  <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                </button>
               </div>
-
-              <button
-                onClick={handleNextSlide}
-                className="p-1.5 rounded-xl hover:bg-white/20 text-white transition-colors active:scale-95"
-                title="Next Featured Movie"
-              >
-                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
-              </button>
-            </div>
-          )}
+            )}
+          </div>
         </section>
       )}
 
       {/* Main Content Layout */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 sm:mt-10 space-y-10 sm:space-y-14">
+      <main className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mt-6 sm:mt-10 space-y-10 sm:space-y-14">
         
         {/* Category Quick Navigation Bar */}
         <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar border-b border-white/10">
