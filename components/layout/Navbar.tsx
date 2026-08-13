@@ -91,27 +91,32 @@ export function Navbar() {
         {/* User Auth Profile Buttons */}
         <div className="flex items-center gap-2 sm:gap-3">
           {user ? (
-            <div className="flex items-center gap-2 sm:gap-3">
+            <div className={`flex items-center gap-2 p-1 pl-1.5 pr-2.5 rounded-full border transition-all backdrop-blur-xl ${
+              isScrolled
+                ? 'bg-slate-900/90 border-white/15 shadow-xl'
+                : 'bg-black/50 border-white/20 shadow-2xl'
+            }`}>
               <Link
                 href="/library"
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-slate-200 text-xs font-semibold hover:border-rose-500/50 active:scale-95 transition-all backdrop-blur-xl ${
-                  isScrolled ? 'bg-slate-900 border-white/10' : 'bg-black/50 border-white/15 shadow-lg'
-                }`}
+                className="flex items-center gap-2 hover:opacity-90 active:scale-95 transition-all"
+                title="Go to Library"
               >
-                <div className="w-6 h-6 rounded-full bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-400 font-bold text-xs">
+                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-rose-600 to-amber-500 flex items-center justify-center text-white font-extrabold text-xs shadow-md shadow-rose-600/30 ring-2 ring-rose-500/30">
                   {profile?.username ? profile.username[0].toUpperCase() : 'U'}
                 </div>
-                <span className="hidden sm:inline font-bold text-slate-100 max-w-[100px] truncate">
+                <span className="hidden sm:inline font-extrabold text-xs text-white max-w-[110px] truncate tracking-wide">
                   {profile?.username || user.email?.split('@')[0]}
                 </span>
               </Link>
 
+              <div className="h-4 w-[1px] bg-white/20 my-auto mx-0.5" />
+
               <button
                 onClick={() => signOut()}
-                className="p-2 rounded-full text-slate-400 hover:text-rose-400 hover:bg-white/10 active:scale-95 transition-colors"
+                className="p-1 rounded-full text-slate-400 hover:text-rose-400 hover:bg-rose-500/20 active:scale-95 transition-all"
                 title="Sign Out"
               >
-                <LogOut className="w-4 h-4" />
+                <LogOut className="w-3.5 h-3.5" />
               </button>
             </div>
           ) : (
