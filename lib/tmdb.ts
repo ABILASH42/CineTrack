@@ -172,6 +172,51 @@ export async function fetchTrendingMovies(): Promise<Movie[]> {
   }
 }
 
+export async function fetchCategoryMoviesPaginated(categoryOrGenreId: string | number, page: number = 1): Promise<{ results: Movie[]; total_pages: number }> {
+  const apiKey = process.env.NEXT_PUBLIC_TMDB_API_KEY;
+  const readToken = process.env.NEXT_PUBLIC_TMDB_READ_TOKEN;
+
+  if (!apiKey && !readToken) {
+    return { results: MOCK_MOVIES, total_pages: 1 };
+  }
+
+  try {
+    let url = '';
+    if (categoryOrGenreId === 'trending') {
+      url = apiKey 
+        ? `https://api.themoviedb.org/3/trending/movie/week?api_key=${apiKey}&page=${page}`
+        : `https://api.themoviedb.org/3/trending/movie/week?page=${page}`;
+    } else if (categoryOrGenreId === 'popular') {
+      url = apiKey 
+        ? `https://api.themoviedb.org/3/movie/popular?api_key=${apiKey}&page=${page}`
+        : `https://api.themoviedb.org/3/movie/popular?page=${page}`;
+    } else {
+      url = apiKey 
+        ? `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&with_genres=${categoryOrGenreId}&sort_by=popularity.desc&page=${page}`
+        : `https://api.themoviedb.org/3/discover/movie?with_genres=${categoryOrGenreId}&sort_by=popularity.desc&page=${page}`;
+    }
+
+    const res = await fetch(url, {
+      headers: readToken ? { Authorization: `Bearer ${readToken}` } : {},
+      next: { revalidate: 3600 }
+    });
+
+    if (!res.ok) throw new Error('Failed to fetch category movies');
+    const data = await res.json();
+    return {
+      results: data.results || [],
+      total_pages: data.total_pages || 1
+    };
+  } catch (error) {
+    return { results: MOCK_MOVIES, total_pages: 1 };
+  }
+}
+
+export async function fetchMoviesByGenre(genreId: number): Promise<Movie[]> {
+  const res = await fetchCategoryMoviesPaginated(genreId, 1);
+  return res.results;
+}
+
 export async function fetchPopularMovies(): Promise<Movie[]> {
   const apiKey = process.env.NEXT_PUBLIC_TMDB_API_KEY;
   const readToken = process.env.NEXT_PUBLIC_TMDB_READ_TOKEN;
@@ -224,23 +269,24 @@ export async function fetchMovieDetails(id: number): Promise<Movie | null> {
   }
 }
 
-export async function searchMovies(query: string): Promise<Movie[]> {
-  if (!query.trim()) return [];
+export async function searchMoviesPaginated(query: string, page: number = 1): Promise<{ results: Movie[]; total_pages: number }> {
+  if (!query.trim()) return { results: [], total_pages: 1 };
 
   const apiKey = process.env.NEXT_PUBLIC_TMDB_API_KEY;
   const readToken = process.env.NEXT_PUBLIC_TMDB_READ_TOKEN;
 
   if (!apiKey && !readToken) {
-    return MOCK_MOVIES.filter((m) =>
+    const filtered = MOCK_MOVIES.filter((m) =>
       m.title.toLowerCase().includes(query.toLowerCase()) ||
       m.overview.toLowerCase().includes(query.toLowerCase())
     );
+    return { results: filtered, total_pages: 1 };
   }
 
   try {
     const url = apiKey 
-      ? `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${encodeURIComponent(query)}`
-      : `https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(query)}`;
+      ? `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${encodeURIComponent(query)}&page=${page}`
+      : `https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(query)}&page=${page}`;
 
     const res = await fetch(url, {
       headers: readToken ? { Authorization: `Bearer ${readToken}` } : {}
@@ -248,10 +294,19 @@ export async function searchMovies(query: string): Promise<Movie[]> {
 
     if (!res.ok) throw new Error('Search failed');
     const data = await res.json();
-    return data.results || [];
+    return {
+      results: data.results || [],
+      total_pages: data.total_pages || 1
+    };
   } catch (error) {
-    return MOCK_MOVIES.filter((m) =>
+    const filtered = MOCK_MOVIES.filter((m) =>
       m.title.toLowerCase().includes(query.toLowerCase())
     );
+    return { results: filtered, total_pages: 1 };
   }
+}
+
+export async function searchMovies(query: string): Promise<Movie[]> {
+  const res = await searchMoviesPaginated(query, 1);
+  return res.results;
 }

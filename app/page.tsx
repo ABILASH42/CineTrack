@@ -2,17 +2,23 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { Movie } from '@/types/movie';
-import { fetchTrendingMovies, fetchPopularMovies } from '@/lib/tmdb';
+import { fetchTrendingMovies, fetchPopularMovies, fetchMoviesByGenre } from '@/lib/tmdb';
 import { MovieCard } from '@/components/movies/MovieCard';
 import { MovieModal } from '@/components/movies/MovieModal';
-import { Sparkles, Flame, Trophy, Play, Star, Plus, Film, Trash2, Check, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Sparkles, Flame, Trophy, Play, Star, Plus, Film, Trash2, Check, ChevronLeft, ChevronRight, Laugh, Heart, ShieldAlert, Rocket, Compass, ArrowRight } from 'lucide-react';
 import { getTMDBImageUrl } from '@/lib/tmdb';
 import { useLibrary } from '@/lib/context/LibraryContext';
 
 export default function HomePage() {
   const [trending, setTrending] = useState<Movie[]>([]);
   const [popular, setPopular] = useState<Movie[]>([]);
+  const [comedy, setComedy] = useState<Movie[]>([]);
+  const [romance, setRomance] = useState<Movie[]>([]);
+  const [action, setAction] = useState<Movie[]>([]);
+  const [sciFi, setSciFi] = useState<Movie[]>([]);
+  
   const [heroIndex, setHeroIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [selectedMovieId, setSelectedMovieId] = useState<number | null>(null);
@@ -22,12 +28,21 @@ export default function HomePage() {
 
   useEffect(() => {
     async function loadData() {
-      const [trendData, popData] = await Promise.all([
+      const [trendData, popData, comedyData, romanceData, actionData, sciFiData] = await Promise.all([
         fetchTrendingMovies(),
         fetchPopularMovies(),
+        fetchMoviesByGenre(35),    // Comedy
+        fetchMoviesByGenre(10749), // Romance
+        fetchMoviesByGenre(28),    // Action
+        fetchMoviesByGenre(878),   // Sci-Fi
       ]);
+
       setTrending(trendData);
       setPopular(popData);
+      setComedy(comedyData);
+      setRomance(romanceData);
+      setAction(actionData);
+      setSciFi(sciFiData);
       setLoading(false);
     }
     loadData();
@@ -63,6 +78,11 @@ export default function HomePage() {
     } else {
       addOrUpdateMovieStatus(heroMovie, 'plan_to_watch');
     }
+  };
+
+  const scrollToSection = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
@@ -187,10 +207,37 @@ export default function HomePage() {
       )}
 
       {/* Main Content Layout */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 sm:mt-12 space-y-10 sm:space-y-14">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 sm:mt-10 space-y-10 sm:space-y-14">
         
+        {/* Category Quick Navigation Bar */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar border-b border-white/10">
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-400 shrink-0 flex items-center gap-1 mr-1">
+            <Compass className="w-3.5 h-3.5 text-rose-500" /> Categories:
+          </span>
+          {[
+            { id: 'trending', label: 'Trending', icon: Flame },
+            { id: 'popular', label: 'Fan Favorites', icon: Trophy },
+            { id: 'comedy', label: 'Comedy', icon: Laugh },
+            { id: 'romance', label: 'Romance', icon: Heart },
+            { id: 'action', label: 'Action & Thrillers', icon: ShieldAlert },
+            { id: 'scifi', label: 'Sci-Fi & Cyberpunk', icon: Rocket },
+          ].map((cat) => {
+            const Icon = cat.icon;
+            return (
+              <button
+                key={cat.id}
+                onClick={() => scrollToSection(cat.id)}
+                className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/5 hover:bg-rose-600/20 text-slate-300 hover:text-rose-300 border border-white/10 transition-all shrink-0 flex items-center gap-1.5 active:scale-95"
+              >
+                <Icon className="w-3.5 h-3.5 text-rose-400" />
+                <span>{cat.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
         {/* Section 1: Trending Now Grid */}
-        <section className="space-y-4 sm:space-y-6">
+        <section id="trending" className="space-y-4 sm:space-y-6 scroll-mt-24">
           <div className="flex items-center justify-between border-b border-white/10 pb-3 sm:pb-4">
             <div className="flex items-center gap-2.5 sm:gap-3">
               <div className="p-2 sm:p-2.5 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-500">
@@ -203,6 +250,14 @@ export default function HomePage() {
                 <p className="text-[11px] sm:text-xs text-slate-400">Most talked about movies right now</p>
               </div>
             </div>
+
+            <Link
+              href="/genre/trending"
+              className="flex items-center gap-1 sm:gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-rose-600/20 text-xs sm:text-sm font-semibold text-rose-400 hover:text-rose-300 border border-white/10 transition-all shrink-0 active:scale-95"
+            >
+              <span>View More</span>
+              <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            </Link>
           </div>
 
           {loading ? (
@@ -225,7 +280,7 @@ export default function HomePage() {
         </section>
 
         {/* Section 2: Top Rated Classics & Popular */}
-        <section className="space-y-4 sm:space-y-6">
+        <section id="popular" className="space-y-4 sm:space-y-6 scroll-mt-24">
           <div className="flex items-center justify-between border-b border-white/10 pb-3 sm:pb-4">
             <div className="flex items-center gap-2.5 sm:gap-3">
               <div className="p-2 sm:p-2.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-500">
@@ -238,6 +293,14 @@ export default function HomePage() {
                 <p className="text-[11px] sm:text-xs text-slate-400">Highest rated blockbusters & cult classics</p>
               </div>
             </div>
+
+            <Link
+              href="/genre/popular"
+              className="flex items-center gap-1 sm:gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-rose-600/20 text-xs sm:text-sm font-semibold text-rose-400 hover:text-rose-300 border border-white/10 transition-all shrink-0 active:scale-95"
+            >
+              <span>View More</span>
+              <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            </Link>
           </div>
 
           <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-6">
@@ -250,6 +313,147 @@ export default function HomePage() {
             ))}
           </div>
         </section>
+
+        {/* Section 3: Comedy Hits */}
+        <section id="comedy" className="space-y-4 sm:space-y-6 scroll-mt-24">
+          <div className="flex items-center justify-between border-b border-white/10 pb-3 sm:pb-4">
+            <div className="flex items-center gap-2.5 sm:gap-3">
+              <div className="p-2 sm:p-2.5 rounded-2xl bg-yellow-500/10 border border-yellow-500/20 text-yellow-400">
+                <Laugh className="w-5 h-5 sm:w-6 sm:h-6" />
+              </div>
+              <div>
+                <h2 className="text-lg sm:text-2xl font-extrabold text-white tracking-tight">
+                  Comedy & Laughs
+                </h2>
+                <p className="text-[11px] sm:text-xs text-slate-400">Hilarious comedies and feel-good movies</p>
+              </div>
+            </div>
+
+            <Link
+              href="/genre/35"
+              className="flex items-center gap-1 sm:gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-rose-600/20 text-xs sm:text-sm font-semibold text-rose-400 hover:text-rose-300 border border-white/10 transition-all shrink-0 active:scale-95"
+            >
+              <span>View More</span>
+              <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-6">
+            {comedy.slice(0, 10).map((movie) => (
+              <MovieCard
+                key={movie.id}
+                movie={movie}
+                onSelect={(m) => setSelectedMovieId(m.id)}
+              />
+            ))}
+          </div>
+        </section>
+
+        {/* Section 4: Romance & Drama */}
+        <section id="romance" className="space-y-4 sm:space-y-6 scroll-mt-24">
+          <div className="flex items-center justify-between border-b border-white/10 pb-3 sm:pb-4">
+            <div className="flex items-center gap-2.5 sm:gap-3">
+              <div className="p-2 sm:p-2.5 rounded-2xl bg-pink-500/10 border border-pink-500/20 text-pink-400">
+                <Heart className="w-5 h-5 sm:w-6 sm:h-6" />
+              </div>
+              <div>
+                <h2 className="text-lg sm:text-2xl font-extrabold text-white tracking-tight">
+                  Romance & Heartfelt Drama
+                </h2>
+                <p className="text-[11px] sm:text-xs text-slate-400">Captivating romantic stories and emotional journeys</p>
+              </div>
+            </div>
+
+            <Link
+              href="/genre/10749"
+              className="flex items-center gap-1 sm:gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-rose-600/20 text-xs sm:text-sm font-semibold text-rose-400 hover:text-rose-300 border border-white/10 transition-all shrink-0 active:scale-95"
+            >
+              <span>View More</span>
+              <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-6">
+            {romance.slice(0, 10).map((movie) => (
+              <MovieCard
+                key={movie.id}
+                movie={movie}
+                onSelect={(m) => setSelectedMovieId(m.id)}
+              />
+            ))}
+          </div>
+        </section>
+
+        {/* Section 5: Action & Thrillers */}
+        <section id="action" className="space-y-4 sm:space-y-6 scroll-mt-24">
+          <div className="flex items-center justify-between border-b border-white/10 pb-3 sm:pb-4">
+            <div className="flex items-center gap-2.5 sm:gap-3">
+              <div className="p-2 sm:p-2.5 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-500">
+                <ShieldAlert className="w-5 h-5 sm:w-6 sm:h-6" />
+              </div>
+              <div>
+                <h2 className="text-lg sm:text-2xl font-extrabold text-white tracking-tight">
+                  Action & Thrillers
+                </h2>
+                <p className="text-[11px] sm:text-xs text-slate-400">High-octane blockbusters and suspenseful thrillers</p>
+              </div>
+            </div>
+
+            <Link
+              href="/genre/28"
+              className="flex items-center gap-1 sm:gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-rose-600/20 text-xs sm:text-sm font-semibold text-rose-400 hover:text-rose-300 border border-white/10 transition-all shrink-0 active:scale-95"
+            >
+              <span>View More</span>
+              <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-6">
+            {action.slice(0, 10).map((movie) => (
+              <MovieCard
+                key={movie.id}
+                movie={movie}
+                onSelect={(m) => setSelectedMovieId(m.id)}
+              />
+            ))}
+          </div>
+        </section>
+
+        {/* Section 6: Sci-Fi & Cyberpunk */}
+        <section id="scifi" className="space-y-4 sm:space-y-6 scroll-mt-24">
+          <div className="flex items-center justify-between border-b border-white/10 pb-3 sm:pb-4">
+            <div className="flex items-center gap-2.5 sm:gap-3">
+              <div className="p-2 sm:p-2.5 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
+                <Rocket className="w-5 h-5 sm:w-6 sm:h-6" />
+              </div>
+              <div>
+                <h2 className="text-lg sm:text-2xl font-extrabold text-white tracking-tight">
+                  Sci-Fi & Cyberpunk
+                </h2>
+                <p className="text-[11px] sm:text-xs text-slate-400">Futuristic adventures and space exploration</p>
+              </div>
+            </div>
+
+            <Link
+              href="/genre/878"
+              className="flex items-center gap-1 sm:gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-rose-600/20 text-xs sm:text-sm font-semibold text-rose-400 hover:text-rose-300 border border-white/10 transition-all shrink-0 active:scale-95"
+            >
+              <span>View More</span>
+              <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-6">
+            {sciFi.slice(0, 10).map((movie) => (
+              <MovieCard
+                key={movie.id}
+                movie={movie}
+                onSelect={(m) => setSelectedMovieId(m.id)}
+              />
+            ))}
+          </div>
+        </section>
+
       </main>
 
       {/* Interactive Detail Modal */}
