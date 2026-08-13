@@ -92,9 +92,9 @@ export default function HomePage() {
         <section
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
-          className="relative w-full min-h-[500px] sm:min-h-[580px] lg:h-[85vh] pt-20 sm:pt-24 pb-12 sm:pb-16 flex items-end overflow-hidden bg-slate-950 group/hero"
+          className="relative w-full min-h-[560px] sm:min-h-[600px] lg:h-[82vh] pt-20 sm:pt-24 pb-16 sm:pb-20 flex items-end overflow-hidden bg-slate-950 group/hero"
         >
-          {/* Backdrop Image with Key Fade Transition & Top Framing */}
+          {/* Vibrant Backdrop Image with Top Subject Framing */}
           <Image
             key={heroMovie.id}
             src={getTMDBImageUrl(heroMovie.backdrop_path || heroMovie.poster_path, 'original')}
@@ -102,34 +102,33 @@ export default function HomePage() {
             fill
             priority
             sizes="100vw"
-            className="object-cover object-[center_20%] opacity-80 sm:opacity-90 scale-105 filter brightness-95 transition-opacity duration-700 animate-fadeIn"
+            className="object-cover object-top sm:object-[center_20%] opacity-90 sm:opacity-95 filter brightness-105 contrast-105 transition-opacity duration-700 animate-fadeIn"
           />
 
-          {/* Vignette Gradients for Legibility and Seamless Navbar Blend */}
-          <div className="absolute inset-0 bg-gradient-to-b from-slate-950/90 via-slate-950/30 to-slate-950" />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/85 to-transparent md:w-3/4 lg:w-3/5" />
+          {/* Clean, Non-Muddy Gradient Vignettes */}
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-slate-950/20 to-transparent max-w-2xl" />
 
           {/* Hero Content Overlay */}
-          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex items-end justify-between gap-8 pb-4 sm:pb-6">
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex items-end justify-between gap-8 pb-2 sm:pb-4">
             <div key={heroMovie.id} className="max-w-2xl space-y-3 sm:space-y-4 animate-fadeIn">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/20 border border-rose-500/30 text-rose-300 text-[10px] sm:text-xs font-bold tracking-wider uppercase backdrop-blur-md shadow-md">
                 <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-rose-400" /> Featured Spotlight #{heroIndex + 1}
               </div>
 
-              <h1 className="text-2xl xs:text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-tight sm:leading-tight drop-shadow-2xl">
+              <h1 className="text-2xl xs:text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]">
                 {heroMovie.title}
               </h1>
 
-              <div className="flex items-center gap-3 text-xs font-bold text-slate-300">
-                <span className="flex items-center gap-1 text-amber-400 bg-amber-400/10 px-2.5 py-1 rounded-md border border-amber-400/20 backdrop-blur-md">
+              <div className="flex items-center gap-3 text-xs font-bold text-slate-200">
+                <span className="flex items-center gap-1 text-amber-400 bg-black/60 px-2.5 py-1 rounded-md border border-amber-400/30 backdrop-blur-md shadow-md">
                   <Star className="w-3.5 h-3.5 fill-amber-400" />
                   {heroMovie.vote_average?.toFixed(1)} / 10
                 </span>
-                <span>{heroMovie.release_date ? heroMovie.release_date.split('-')[0] : ''}</span>
+                <span className="bg-black/40 px-2 py-0.5 rounded border border-white/10">{heroMovie.release_date ? heroMovie.release_date.split('-')[0] : ''}</span>
               </div>
 
-              <p className="text-xs sm:text-base text-slate-200 line-clamp-2 sm:line-clamp-3 leading-relaxed drop-shadow-lg max-w-xl">
+              <p className="text-xs sm:text-base text-slate-200 line-clamp-2 sm:line-clamp-3 leading-relaxed max-w-xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
                 {heroMovie.overview}
               </p>
 
@@ -143,10 +142,10 @@ export default function HomePage() {
 
                 <button
                   onClick={handleHeroWatchlistToggle}
-                  className={`group/watchbtn w-[160px] sm:w-[170px] py-3 rounded-2xl border text-xs font-bold flex items-center justify-center gap-2 backdrop-blur-md active:scale-95 transition-all shrink-0 ${
+                  className={`group/watchbtn w-full sm:w-[170px] py-3 rounded-2xl border text-xs font-bold flex items-center justify-center gap-2 backdrop-blur-md active:scale-95 transition-all shrink-0 ${
                     heroLog?.status
                       ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 hover:bg-rose-600 hover:text-white hover:border-rose-500 shadow-md'
-                      : 'bg-white/10 hover:bg-white/20 text-white border-white/20'
+                      : 'bg-black/40 hover:bg-white/20 text-white border-white/20'
                   }`}
                 >
                   {heroLog?.status ? (
@@ -169,7 +168,7 @@ export default function HomePage() {
 
           {/* Crunchyroll-style Bottom Slider Navigation Bar */}
           {topHeroMovies.length > 1 && (
-            <div className="absolute bottom-3 right-4 sm:bottom-6 sm:right-6 z-20 flex items-center gap-1.5 sm:gap-2 bg-black/60 backdrop-blur-xl p-1.5 sm:p-2 rounded-2xl border border-white/10 shadow-2xl">
+            <div className="absolute bottom-3 right-4 sm:bottom-6 sm:right-6 z-20 flex items-center gap-1.5 sm:gap-2 bg-black/75 backdrop-blur-xl p-1.5 sm:p-2 rounded-2xl border border-white/15 shadow-2xl">
               <button
                 onClick={handlePrevSlide}
                 className="p-1.5 rounded-xl hover:bg-white/20 text-white transition-colors active:scale-95"
