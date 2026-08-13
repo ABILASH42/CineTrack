@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { X, Star, Calendar, Clock, Film, Check, Bookmark, Eye, Heart, Plus, Play, Sparkles, MessageSquare } from 'lucide-react';
+import { X, Star, Calendar, Clock, Film, Check, Bookmark, Eye, Heart, Plus, Play, Sparkles, MessageSquare, Trash2 } from 'lucide-react';
 import { Movie, WatchStatus } from '@/types/movie';
 import { fetchMovieDetails, getTMDBImageUrl } from '@/lib/tmdb';
 import { formatMinutesToHours, formatDate } from '@/lib/utils';
@@ -23,7 +23,7 @@ export function MovieModal({ movieId, onClose }: MovieModalProps) {
   const [showCollectionPicker, setShowCollectionPicker] = useState(false);
   const [selectedCollectionId, setSelectedCollectionId] = useState('');
 
-  const { getMovieLog, addOrUpdateMovieStatus, collections, addMovieToCollection } = useLibrary();
+  const { getMovieLog, addOrUpdateMovieStatus, removeMovieLog, collections, addMovieToCollection } = useLibrary();
 
   useEffect(() => {
     if (!movieId) return;
@@ -50,6 +50,13 @@ export function MovieModal({ movieId, onClose }: MovieModalProps) {
 
   const handleStatusChange = (status: WatchStatus) => {
     if (!movie) return;
+    if (existingLog?.status === status) {
+      removeMovieLog(movie.id);
+      setUserRating(0);
+      setUserReview('');
+      return;
+    }
+
     addOrUpdateMovieStatus(movie, status, userRating || undefined, userReview || undefined);
 
     if (status === 'completed') {
@@ -74,6 +81,13 @@ export function MovieModal({ movieId, onClose }: MovieModalProps) {
     if (!movie) return;
     const targetStatus = existingLog?.status || 'completed';
     addOrUpdateMovieStatus(movie, targetStatus, userRating, userReview);
+  };
+
+  const handleRemoveFromWatchlist = () => {
+    if (!movie) return;
+    removeMovieLog(movie.id);
+    setUserRating(0);
+    setUserReview('');
   };
 
   const handleAddToCollection = (colId: string) => {
@@ -193,7 +207,7 @@ export function MovieModal({ movieId, onClose }: MovieModalProps) {
                 <Sparkles className="w-3.5 h-3.5 text-rose-500" /> Watch Status
               </span>
 
-              <div className="grid grid-cols-3 sm:flex items-center gap-1.5 sm:gap-2">
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                 {[
                   { status: 'plan_to_watch', label: 'Plan to Watch', icon: Bookmark },
                   { status: 'watching', label: 'Watching', icon: Eye },
@@ -216,6 +230,17 @@ export function MovieModal({ movieId, onClose }: MovieModalProps) {
                     </button>
                   );
                 })}
+
+                {existingLog && (
+                  <button
+                    onClick={handleRemoveFromWatchlist}
+                    className="px-2.5 py-2 rounded-xl text-[11px] sm:text-xs font-bold flex items-center justify-center gap-1 sm:gap-1.5 bg-rose-500/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/40 transition-all active:scale-95 shrink-0"
+                    title="Remove from Watchlist & Library"
+                  >
+                    <Trash2 className="w-3.5 h-3.5 shrink-0 text-rose-400" />
+                    <span className="truncate">Remove</span>
+                  </button>
+                )}
               </div>
             </div>
 

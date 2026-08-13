@@ -132,6 +132,7 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
       poster_path: movie.poster_path,
       release_date: movie.release_date,
       runtime: movie.runtime || 120,
+      vote_average: movie.vote_average || (existing?.vote_average ?? null),
       status,
       rating: rating !== undefined ? rating : (existing?.rating ?? null),
       review: review !== undefined ? review : (existing?.review ?? null),

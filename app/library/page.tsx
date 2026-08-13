@@ -117,7 +117,7 @@ export default function LibraryPage() {
                 poster_path: log.poster_path,
                 backdrop_path: null,
                 release_date: log.release_date,
-                vote_average: log.rating || 0,
+                vote_average: log.vote_average ?? 0,
                 runtime: log.runtime,
               }}
               onSelect={(m) => setSelectedMovieId(m.id)}

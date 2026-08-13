@@ -52,6 +52,7 @@ export interface UserMovieLog {
   release_date: string;
   runtime: number;
   status: WatchStatus;
+  vote_average?: number | null;
   rating: number | null; // 1-10 rating scale
   review?: string | null;
   favorite?: boolean;

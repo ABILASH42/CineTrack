@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { Star, Plus, Check, Bookmark, Eye, Play, Sparkles } from 'lucide-react';
+import { Star, Plus, Check, Bookmark, Eye, Play, Trash2 } from 'lucide-react';
 import { Movie, WatchStatus } from '@/types/movie';
 import { getTMDBImageUrl } from '@/lib/tmdb';
 import { useLibrary } from '@/lib/context/LibraryContext';
@@ -13,7 +13,7 @@ interface MovieCardProps {
 }
 
 export function MovieCard({ movie, onSelect }: MovieCardProps) {
-  const { getMovieLog, addOrUpdateMovieStatus } = useLibrary();
+  const { getMovieLog, addOrUpdateMovieStatus, removeMovieLog } = useLibrary();
   const [isHovered, setIsHovered] = useState(false);
   const log = getMovieLog(movie.id);
 
@@ -30,9 +30,13 @@ export function MovieCard({ movie, onSelect }: MovieCardProps) {
     }
   };
 
-  const handleQuickAdd = (e: React.MouseEvent, status: WatchStatus) => {
+  const handleQuickAction = (e: React.MouseEvent) => {
     e.stopPropagation();
-    addOrUpdateMovieStatus(movie, status);
+    if (log?.status) {
+      removeMovieLog(movie.id);
+    } else {
+      addOrUpdateMovieStatus(movie, 'plan_to_watch');
+    }
   };
 
   return (
@@ -54,8 +58,8 @@ export function MovieCard({ movie, onSelect }: MovieCardProps) {
 
         {/* Top Badges Overlay */}
         <div className="absolute top-1.5 sm:top-2.5 left-1.5 sm:left-2.5 right-1.5 sm:right-2.5 flex items-center justify-between pointer-events-none z-10 gap-1">
-          <div className="flex items-center gap-1 bg-black/75 backdrop-blur-md text-amber-400 text-[10px] sm:text-xs font-bold px-2 py-0.5 sm:py-1 rounded-full border border-white/10 shadow-lg">
-            <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-amber-400 text-amber-400" />
+          <div className="flex items-center gap-1 bg-black/80 backdrop-blur-md text-amber-400 text-[10px] sm:text-xs font-bold px-2 py-0.5 sm:py-1 rounded-full border border-white/10 shadow-lg" title="TMDB Rating">
+            <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-amber-400 text-amber-400 shrink-0" />
             <span>{movie.vote_average ? movie.vote_average.toFixed(1) : 'N/A'}</span>
           </div>
 
@@ -74,15 +78,25 @@ export function MovieCard({ movie, onSelect }: MovieCardProps) {
 
           <div className="flex items-center gap-1.5">
             <button
-              onClick={(e) => handleQuickAdd(e, 'plan_to_watch')}
+              onClick={handleQuickAction}
               className={`flex-1 py-1.5 sm:py-2 px-2 sm:px-3 rounded-xl text-[10px] sm:text-xs font-semibold flex items-center justify-center gap-1 transition-all shadow-md active:scale-95 ${
-                log?.status === 'plan_to_watch'
-                  ? 'bg-sky-500 text-white'
-                  : 'bg-white/20 text-white hover:bg-rose-600 hover:shadow-rose-600/30'
+                log?.status
+                  ? 'bg-rose-500/30 text-rose-200 hover:bg-rose-600 hover:text-white border border-rose-500/40 backdrop-blur-md'
+                  : 'bg-white/20 text-white hover:bg-rose-600 hover:shadow-rose-600/30 backdrop-blur-md'
               }`}
+              title={log?.status ? 'Remove from Watchlist & Library' : 'Add to Watchlist'}
             >
-              {log?.status === 'plan_to_watch' ? <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> : <Plus className="w-3 h-3 sm:w-3.5 sm:h-3.5" />}
-              <span className="truncate">{log?.status === 'plan_to_watch' ? 'In Watchlist' : 'Watchlist'}</span>
+              {log?.status ? (
+                <>
+                  <Trash2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-rose-400" />
+                  <span className="truncate">Remove</span>
+                </>
+              ) : (
+                <>
+                  <Plus className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                  <span className="truncate">Watchlist</span>
+                </>
+              )}
             </button>
 
             <button
@@ -102,11 +116,11 @@ export function MovieCard({ movie, onSelect }: MovieCardProps) {
           <h3 className="font-bold text-xs sm:text-sm text-slate-100 group-hover:text-rose-400 transition-colors line-clamp-1">
             {movie.title}
           </h3>
-          <div className="text-[11px] sm:text-xs font-medium text-slate-400 mt-0.5 sm:mt-1 flex items-center justify-between">
+          <div className="text-[11px] sm:text-xs font-medium text-slate-400 mt-0.5 sm:mt-1 flex items-center justify-between gap-1">
             <span>{movie.release_date ? movie.release_date.split('-')[0] : 'TBA'}</span>
             {log?.rating ? (
-              <span className="text-rose-400 font-semibold flex items-center gap-0.5">
-                ★ {log.rating}/10
+              <span className="text-rose-400 font-bold flex items-center gap-0.5 bg-rose-500/10 px-1.5 py-0.5 rounded-md border border-rose-500/20 text-[10px] sm:text-xs shrink-0" title="Your Rating">
+                <span className="text-[9px] uppercase tracking-wider text-rose-300 font-extrabold">My:</span> ★ {log.rating}/10
               </span>
             ) : null}
           </div>

@@ -6,7 +6,7 @@ import { Movie } from '@/types/movie';
 import { fetchTrendingMovies, fetchPopularMovies } from '@/lib/tmdb';
 import { MovieCard } from '@/components/movies/MovieCard';
 import { MovieModal } from '@/components/movies/MovieModal';
-import { Sparkles, Flame, Trophy, Play, Star, Plus, Film } from 'lucide-react';
+import { Sparkles, Flame, Trophy, Play, Star, Plus, Film, Trash2 } from 'lucide-react';
 import { getTMDBImageUrl } from '@/lib/tmdb';
 import { useLibrary } from '@/lib/context/LibraryContext';
 
@@ -17,7 +17,7 @@ export default function HomePage() {
   const [selectedMovieId, setSelectedMovieId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const { addOrUpdateMovieStatus, getMovieLog } = useLibrary();
+  const { addOrUpdateMovieStatus, removeMovieLog, getMovieLog } = useLibrary();
 
   useEffect(() => {
     async function loadData() {
@@ -36,6 +36,15 @@ export default function HomePage() {
   }, []);
 
   const heroLog = heroMovie ? getMovieLog(heroMovie.id) : undefined;
+
+  const handleHeroWatchlistToggle = () => {
+    if (!heroMovie) return;
+    if (heroLog?.status) {
+      removeMovieLog(heroMovie.id);
+    } else {
+      addOrUpdateMovieStatus(heroMovie, 'plan_to_watch');
+    }
+  };
 
   return (
     <div className="min-h-screen pb-28 sm:pb-20">
@@ -87,15 +96,24 @@ export default function HomePage() {
                 </button>
 
                 <button
-                  onClick={() => addOrUpdateMovieStatus(heroMovie, 'plan_to_watch')}
+                  onClick={handleHeroWatchlistToggle}
                   className={`px-6 py-3 rounded-2xl border text-xs font-bold flex items-center justify-center gap-2 backdrop-blur-md active:scale-95 transition-all shrink-0 ${
-                    heroLog?.status === 'plan_to_watch'
-                      ? 'bg-sky-500 text-white border-sky-400'
+                    heroLog?.status
+                      ? 'bg-rose-500/20 text-rose-300 border-rose-500/40 hover:bg-rose-500/30'
                       : 'bg-white/10 hover:bg-white/20 text-white border-white/20'
                   }`}
                 >
-                  <Plus className="w-4 h-4 text-rose-400" />
-                  {heroLog?.status === 'plan_to_watch' ? 'In Watchlist' : 'Add to Watchlist'}
+                  {heroLog?.status ? (
+                    <>
+                      <Trash2 className="w-4 h-4 text-rose-400" />
+                      <span>Remove from Watchlist</span>
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="w-4 h-4 text-rose-400" />
+                      <span>Add to Watchlist</span>
+                    </>
+                  )}
                 </button>
               </div>
             </div>
