@@ -20,9 +20,9 @@ const GENRES = [
 ];
 
 const SORT_OPTIONS = [
-  { value: 'popularity', label: 'Sort: Most Popular' },
-  { value: 'rating', label: 'Sort: Highest Rated' },
-  { value: 'release', label: 'Sort: Newest Release' },
+  { value: 'popularity', label: 'Most Popular' },
+  { value: 'rating', label: 'Highest Rated' },
+  { value: 'release', label: 'Newest Release' },
 ];
 
 export default function SearchPage() {
@@ -158,9 +158,9 @@ export default function SearchPage() {
         </div>
 
         {/* Filter Pills Bar & Custom Sort Selection */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-1">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1 min-w-0">
           {/* Genre Filter Pills */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar min-w-0 flex-1 w-full sm:w-auto">
+          <div className="flex items-center gap-1.5 overflow-x-auto p-1.5 no-scrollbar min-w-0 flex-1">
             {GENRES.map((g) => (
               <button
                 key={g.id}

@@ -7,9 +7,9 @@ import { Plus, Library as LibraryIcon, Sparkles, FolderPlus, X, Search } from 'l
 import { CustomSelect } from '@/components/ui/CustomSelect';
 
 const COLLECTION_SORT_OPTIONS = [
-  { value: 'newest', label: 'Sort: Newest Created' },
-  { value: 'movies_count', label: 'Sort: Most Movies' },
-  { value: 'title_asc', label: 'Sort: Title (A-Z)' },
+  { value: 'newest', label: 'Newest Created' },
+  { value: 'movies_count', label: 'Most Movies' },
+  { value: 'title_asc', label: 'Title (A-Z)' },
 ];
 
 export default function CollectionsPage() {

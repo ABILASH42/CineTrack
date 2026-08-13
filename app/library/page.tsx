@@ -10,10 +10,10 @@ import { formatMinutesToHours } from '@/lib/utils';
 import { CustomSelect } from '@/components/ui/CustomSelect';
 
 const LIBRARY_SORT_OPTIONS = [
-  { value: 'updated', label: 'Sort: Recently Updated' },
-  { value: 'rating_desc', label: 'Sort: Rating (High to Low)' },
-  { value: 'rating_asc', label: 'Sort: Rating (Low to High)' },
-  { value: 'title_asc', label: 'Sort: Title (A-Z)' },
+  { value: 'updated', label: 'Recently Updated' },
+  { value: 'rating_desc', label: 'Rating (High to Low)' },
+  { value: 'rating_asc', label: 'Rating (Low to High)' },
+  { value: 'title_asc', label: 'Title (A-Z)' },
 ];
 
 export default function LibraryPage() {
