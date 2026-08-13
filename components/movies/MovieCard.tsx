@@ -20,11 +20,11 @@ export function MovieCard({ movie, onSelect }: MovieCardProps) {
   const getStatusBadge = (status?: WatchStatus) => {
     switch (status) {
       case 'completed':
-        return <span className="bg-emerald-500/90 text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm backdrop-blur-md"><Check className="w-3 h-3" /> Watched</span>;
+        return <span className="bg-emerald-500/90 text-white text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full flex items-center gap-0.5 sm:gap-1 shadow-sm backdrop-blur-md shrink-0"><Check className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> <span className="hidden xs:inline">Watched</span></span>;
       case 'watching':
-        return <span className="bg-amber-500/90 text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm backdrop-blur-md"><Eye className="w-3 h-3" /> Watching</span>;
+        return <span className="bg-amber-500/90 text-white text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full flex items-center gap-0.5 sm:gap-1 shadow-sm backdrop-blur-md shrink-0"><Eye className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> <span className="hidden xs:inline">Watching</span></span>;
       case 'plan_to_watch':
-        return <span className="bg-sky-500/90 text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm backdrop-blur-md"><Bookmark className="w-3 h-3" /> Plan</span>;
+        return <span className="bg-sky-500/90 text-white text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full flex items-center gap-0.5 sm:gap-1 shadow-sm backdrop-blur-md shrink-0"><Bookmark className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> <span className="hidden xs:inline">Plan</span></span>;
       default:
         return null;
     }
@@ -40,7 +40,7 @@ export function MovieCard({ movie, onSelect }: MovieCardProps) {
       onClick={() => onSelect && onSelect(movie)}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="group relative cursor-pointer flex flex-col rounded-2xl overflow-hidden bg-slate-900/60 border border-white/10 hover:border-rose-500/40 transition-all duration-300 hover:shadow-2xl hover:shadow-rose-950/50 hover:-translate-y-1.5"
+      className="group relative cursor-pointer flex flex-col rounded-2xl overflow-hidden bg-slate-900/60 border border-white/10 hover:border-rose-500/40 active:scale-[0.98] transition-all duration-300 hover:shadow-2xl hover:shadow-rose-950/50 sm:hover:-translate-y-1.5"
     >
       {/* Poster Media */}
       <div className="relative aspect-[2/3] w-full overflow-hidden bg-slate-950">
@@ -48,68 +48,68 @@ export function MovieCard({ movie, onSelect }: MovieCardProps) {
           src={getTMDBImageUrl(movie.poster_path, 'w500')}
           alt={movie.title}
           fill
-          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 20vw"
+          sizes="(max-width: 640px) 48vw, (max-width: 1024px) 25vw, 20vw"
           className="object-cover transition-transform duration-500 group-hover:scale-105"
         />
 
         {/* Top Badges Overlay */}
-        <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between pointer-events-none z-10">
-          <div className="flex items-center gap-1 bg-black/70 backdrop-blur-md text-amber-400 text-xs font-bold px-2.5 py-1 rounded-full border border-white/10 shadow-lg">
-            <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+        <div className="absolute top-1.5 sm:top-2.5 left-1.5 sm:left-2.5 right-1.5 sm:right-2.5 flex items-center justify-between pointer-events-none z-10 gap-1">
+          <div className="flex items-center gap-1 bg-black/75 backdrop-blur-md text-amber-400 text-[10px] sm:text-xs font-bold px-2 py-0.5 sm:py-1 rounded-full border border-white/10 shadow-lg">
+            <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-amber-400 text-amber-400" />
             <span>{movie.vote_average ? movie.vote_average.toFixed(1) : 'N/A'}</span>
           </div>
 
           {log?.status && getStatusBadge(log.status)}
         </div>
 
-        {/* Hover Action Overlay */}
+        {/* Hover / Touch Action Overlay */}
         <div
-          className={`absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent p-4 flex flex-col justify-end transition-opacity duration-300 ${
-            isHovered ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          className={`absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/70 to-transparent p-3 sm:p-4 flex flex-col justify-end transition-opacity duration-300 ${
+            isHovered ? 'opacity-100' : 'opacity-0 pointer-events-none sm:group-hover:opacity-100 sm:group-hover:pointer-events-auto'
           }`}
         >
-          <p className="text-xs text-slate-300 line-clamp-3 mb-3 leading-relaxed">
+          <p className="text-[11px] sm:text-xs text-slate-300 line-clamp-3 mb-2.5 leading-relaxed hidden sm:block">
             {movie.overview || 'No synopsis available.'}
           </p>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <button
               onClick={(e) => handleQuickAdd(e, 'plan_to_watch')}
-              className={`flex-1 py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-md ${
+              className={`flex-1 py-1.5 sm:py-2 px-2 sm:px-3 rounded-xl text-[10px] sm:text-xs font-semibold flex items-center justify-center gap-1 transition-all shadow-md active:scale-95 ${
                 log?.status === 'plan_to_watch'
                   ? 'bg-sky-500 text-white'
-                  : 'bg-white/15 text-white hover:bg-rose-600 hover:shadow-rose-600/30'
+                  : 'bg-white/20 text-white hover:bg-rose-600 hover:shadow-rose-600/30'
               }`}
             >
-              {log?.status === 'plan_to_watch' ? <Check className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
-              {log?.status === 'plan_to_watch' ? 'In Watchlist' : 'Add Watchlist'}
+              {log?.status === 'plan_to_watch' ? <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> : <Plus className="w-3 h-3 sm:w-3.5 sm:h-3.5" />}
+              <span className="truncate">{log?.status === 'plan_to_watch' ? 'In Watchlist' : 'Watchlist'}</span>
             </button>
 
             <button
               onClick={() => onSelect && onSelect(movie)}
-              className="p-2 rounded-xl bg-white/20 hover:bg-white/30 text-white backdrop-blur-md transition-colors"
+              className="p-1.5 sm:p-2 rounded-xl bg-white/20 hover:bg-white/30 text-white backdrop-blur-md transition-colors active:scale-95 shrink-0"
               title="View Details"
             >
-              <Play className="w-3.5 h-3.5 fill-white" />
+              <Play className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-white" />
             </button>
           </div>
         </div>
       </div>
 
       {/* Card Info Details */}
-      <div className="p-3.5 flex flex-col justify-between flex-1 bg-slate-900/80 backdrop-blur-sm">
+      <div className="p-2.5 sm:p-3.5 flex flex-col justify-between flex-1 bg-slate-900/80 backdrop-blur-sm">
         <div>
-          <h3 className="font-bold text-sm text-slate-100 group-hover:text-rose-400 transition-colors line-clamp-1">
+          <h3 className="font-bold text-xs sm:text-sm text-slate-100 group-hover:text-rose-400 transition-colors line-clamp-1">
             {movie.title}
           </h3>
-          <p className="text-xs font-medium text-slate-400 mt-1 flex items-center justify-between">
+          <div className="text-[11px] sm:text-xs font-medium text-slate-400 mt-0.5 sm:mt-1 flex items-center justify-between">
             <span>{movie.release_date ? movie.release_date.split('-')[0] : 'TBA'}</span>
-            {log?.rating && (
+            {log?.rating ? (
               <span className="text-rose-400 font-semibold flex items-center gap-0.5">
                 ★ {log.rating}/10
               </span>
-            )}
-          </p>
+            ) : null}
+          </div>
         </div>
       </div>
     </div>

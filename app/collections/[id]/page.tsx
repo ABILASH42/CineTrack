@@ -29,27 +29,27 @@ export default function CollectionDetailPage() {
   const posters = collection.posters || [];
 
   return (
-    <div className="min-h-screen py-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+    <div className="min-h-screen py-6 sm:py-10 pb-28 sm:pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-10">
       
       {/* Header Banner */}
-      <div className="space-y-4">
+      <div className="space-y-3 sm:space-y-4">
         <Link href="/collections" className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-400 hover:text-white transition-colors">
           <ArrowLeft className="w-4 h-4" /> Back to Collections
         </Link>
 
-        <div className="p-8 rounded-3xl bg-slate-900/80 border border-white/10 space-y-3 backdrop-blur-xl">
+        <div className="p-5 sm:p-8 rounded-3xl bg-slate-900/80 border border-white/10 space-y-2.5 sm:space-y-3 backdrop-blur-xl">
           <div className="flex items-center gap-2">
-            <span className="bg-rose-500/20 text-rose-300 text-xs font-bold px-3 py-1 rounded-full border border-rose-500/30 flex items-center gap-1">
-              {collection.is_public ? <Globe className="w-3 h-3" /> : <Lock className="w-3 h-3" />}
+            <span className="bg-rose-500/20 text-rose-300 text-[10px] sm:text-xs font-bold px-2.5 py-1 rounded-full border border-rose-500/30 flex items-center gap-1">
+              {collection.is_public ? <Globe className="w-3 h-3 text-sky-400" /> : <Lock className="w-3 h-3 text-amber-400" />}
               {collection.is_public ? 'Public Collection' : 'Private Collection'}
             </span>
           </div>
 
-          <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
+          <h1 className="text-2xl xs:text-3xl sm:text-5xl font-black text-white tracking-tight">
             {collection.name}
           </h1>
 
-          <p className="text-sm text-slate-300 max-w-2xl leading-relaxed">
+          <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
             {collection.description || 'Custom curated movie collection.'}
           </p>
         </div>
@@ -57,7 +57,7 @@ export default function CollectionDetailPage() {
 
       {/* Movies in Collection Grid */}
       {posters.length > 0 ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
+        <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-6">
           {posters.map((poster, index) => (
             <MovieCard
               key={index}
@@ -75,9 +75,9 @@ export default function CollectionDetailPage() {
           ))}
         </div>
       ) : (
-        <div className="py-20 flex flex-col items-center justify-center text-center space-y-3">
-          <Layers className="w-12 h-12 text-slate-700" />
-          <p className="text-lg font-bold text-slate-300">No movies added to this collection yet</p>
+        <div className="py-16 sm:py-20 flex flex-col items-center justify-center text-center space-y-3">
+          <Layers className="w-10 h-10 sm:w-12 sm:h-12 text-slate-700" />
+          <p className="text-base sm:text-lg font-bold text-slate-300">No movies added to this collection yet</p>
           <p className="text-xs text-slate-500">Open any movie details modal and click "Add to Collection" to add titles!</p>
         </div>
       )}
