@@ -61,6 +61,11 @@ export const metadata: Metadata = {
   verification: {
     google: "UNhWjOMuWvbtqZ0BgHssRJq0Pe9t0rkX6p2aWF56oeE",
   },
+  icons: {
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+    apple: "/icon.svg",
+  },
 };
 
 const jsonLd = {

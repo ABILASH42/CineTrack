@@ -92,9 +92,9 @@ export default function HomePage() {
         <section
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
-          className="relative w-full min-h-[440px] sm:min-h-[520px] lg:h-[82vh] flex items-end overflow-hidden bg-slate-950 group/hero"
+          className="relative w-full min-h-[500px] sm:min-h-[580px] lg:h-[85vh] pt-20 sm:pt-24 pb-12 sm:pb-16 flex items-end overflow-hidden bg-slate-950 group/hero"
         >
-          {/* Backdrop Image with Key Fade Transition */}
+          {/* Backdrop Image with Key Fade Transition & Top Framing */}
           <Image
             key={heroMovie.id}
             src={getTMDBImageUrl(heroMovie.backdrop_path || heroMovie.poster_path, 'original')}
@@ -102,21 +102,22 @@ export default function HomePage() {
             fill
             priority
             sizes="100vw"
-            className="object-cover opacity-75 sm:opacity-85 scale-105 filter brightness-100 transition-opacity duration-700 animate-fadeIn"
+            className="object-cover object-[center_20%] opacity-80 sm:opacity-90 scale-105 filter brightness-95 transition-opacity duration-700 animate-fadeIn"
           />
 
-          {/* Vignette Gradients for Legibility */}
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/50 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/80 to-transparent md:w-3/4 lg:w-2/3" />
+          {/* Vignette Gradients for Legibility and Seamless Navbar Blend */}
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-950/90 via-slate-950/30 to-slate-950" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/85 to-transparent md:w-3/4 lg:w-3/5" />
 
           {/* Hero Content Overlay */}
-          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:pb-16 w-full flex items-end justify-between gap-8">
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex items-end justify-between gap-8 pb-4 sm:pb-6">
             <div key={heroMovie.id} className="max-w-2xl space-y-3 sm:space-y-4 animate-fadeIn">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/20 border border-rose-500/30 text-rose-300 text-[10px] sm:text-xs font-bold tracking-wider uppercase backdrop-blur-md shadow-md">
                 <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-rose-400" /> Featured Spotlight #{heroIndex + 1}
               </div>
 
-              <h1 className="text-2xl xs:text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-tight sm:leading-none drop-shadow-xl">
+              <h1 className="text-2xl xs:text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-tight sm:leading-tight drop-shadow-2xl">
                 {heroMovie.title}
               </h1>
 
@@ -128,7 +129,7 @@ export default function HomePage() {
                 <span>{heroMovie.release_date ? heroMovie.release_date.split('-')[0] : ''}</span>
               </div>
 
-              <p className="text-xs sm:text-base text-slate-300 line-clamp-2 sm:line-clamp-3 leading-relaxed drop-shadow-md max-w-xl">
+              <p className="text-xs sm:text-base text-slate-200 line-clamp-2 sm:line-clamp-3 leading-relaxed drop-shadow-lg max-w-xl">
                 {heroMovie.overview}
               </p>
 
