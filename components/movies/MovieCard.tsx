@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { Star, Plus, Check, Bookmark, Eye, Play, Trash2 } from 'lucide-react';
+import { Star, Plus, Check, Bookmark, Eye, Trash2 } from 'lucide-react';
 import { Movie, WatchStatus } from '@/types/movie';
 import { getTMDBImageUrl } from '@/lib/tmdb';
 import { useLibrary } from '@/lib/context/LibraryContext';
@@ -76,10 +76,10 @@ export function MovieCard({ movie, onSelect }: MovieCardProps) {
             {movie.overview || 'No synopsis available.'}
           </p>
 
-          <div className="flex items-center gap-1.5">
+          <div className="w-full">
             <button
               onClick={handleQuickAction}
-              className={`flex-1 py-1.5 sm:py-2 px-2 sm:px-3 rounded-xl text-[10px] sm:text-xs font-semibold flex items-center justify-center gap-1 transition-all shadow-md active:scale-95 ${
+              className={`w-full py-1.5 sm:py-2 px-2 sm:px-3 rounded-xl text-[10px] sm:text-xs font-semibold flex items-center justify-center gap-1 transition-all shadow-md active:scale-95 ${
                 log?.status
                   ? 'bg-rose-500/30 text-rose-200 hover:bg-rose-600 hover:text-white border border-rose-500/40 backdrop-blur-md'
                   : 'bg-white/20 text-white hover:bg-rose-600 hover:shadow-rose-600/30 backdrop-blur-md'
@@ -97,14 +97,6 @@ export function MovieCard({ movie, onSelect }: MovieCardProps) {
                   <span className="truncate">Watchlist</span>
                 </>
               )}
-            </button>
-
-            <button
-              onClick={() => onSelect && onSelect(movie)}
-              className="p-1.5 sm:p-2 rounded-xl bg-white/20 hover:bg-white/30 text-white backdrop-blur-md transition-colors active:scale-95 shrink-0"
-              title="View Details"
-            >
-              <Play className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-white" />
             </button>
           </div>
         </div>
