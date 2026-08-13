@@ -61,6 +61,7 @@ export default function GenrePage({ params }: { params: Promise<{ id: string }> 
   const [movies, setMovies] = useState<Movie[]>([]);
   const [page, setPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
+  const [totalResults, setTotalResults] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [loadingMore, setLoadingMore] = useState<boolean>(false);
   const [selectedMovieId, setSelectedMovieId] = useState<number | null>(null);
@@ -74,6 +75,7 @@ export default function GenrePage({ params }: { params: Promise<{ id: string }> 
       const res = await fetchCategoryMoviesPaginated(id, 1);
       setMovies(res.results);
       setTotalPages(res.total_pages);
+      setTotalResults(res.total_results || 0);
       setPage(1);
       setLoading(false);
     }
@@ -144,7 +146,7 @@ export default function GenrePage({ params }: { params: Promise<{ id: string }> 
         </div>
 
         <div className="flex items-center gap-2 bg-slate-900 border border-white/10 px-3.5 py-1.5 rounded-full text-xs font-bold text-slate-300">
-          <span className="text-rose-400">{movies.length}</span> movies loaded (Page {page} of {totalPages})
+          <span className="text-rose-400">{totalResults.toLocaleString()}</span> Movies
         </div>
       </div>
 

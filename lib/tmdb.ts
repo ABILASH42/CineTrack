@@ -172,12 +172,12 @@ export async function fetchTrendingMovies(): Promise<Movie[]> {
   }
 }
 
-export async function fetchCategoryMoviesPaginated(categoryOrGenreId: string | number, page: number = 1): Promise<{ results: Movie[]; total_pages: number }> {
+export async function fetchCategoryMoviesPaginated(categoryOrGenreId: string | number, page: number = 1): Promise<{ results: Movie[]; total_pages: number; total_results: number }> {
   const apiKey = process.env.NEXT_PUBLIC_TMDB_API_KEY;
   const readToken = process.env.NEXT_PUBLIC_TMDB_READ_TOKEN;
 
   if (!apiKey && !readToken) {
-    return { results: MOCK_MOVIES, total_pages: 1 };
+    return { results: MOCK_MOVIES, total_pages: 1, total_results: MOCK_MOVIES.length };
   }
 
   try {
@@ -205,10 +205,11 @@ export async function fetchCategoryMoviesPaginated(categoryOrGenreId: string | n
     const data = await res.json();
     return {
       results: data.results || [],
-      total_pages: data.total_pages || 1
+      total_pages: data.total_pages || 1,
+      total_results: data.total_results || (data.results?.length || 0)
     };
   } catch (error) {
-    return { results: MOCK_MOVIES, total_pages: 1 };
+    return { results: MOCK_MOVIES, total_pages: 1, total_results: MOCK_MOVIES.length };
   }
 }
 
@@ -269,8 +270,8 @@ export async function fetchMovieDetails(id: number): Promise<Movie | null> {
   }
 }
 
-export async function searchMoviesPaginated(query: string, page: number = 1): Promise<{ results: Movie[]; total_pages: number }> {
-  if (!query.trim()) return { results: [], total_pages: 1 };
+export async function searchMoviesPaginated(query: string, page: number = 1): Promise<{ results: Movie[]; total_pages: number; total_results: number }> {
+  if (!query.trim()) return { results: [], total_pages: 1, total_results: 0 };
 
   const apiKey = process.env.NEXT_PUBLIC_TMDB_API_KEY;
   const readToken = process.env.NEXT_PUBLIC_TMDB_READ_TOKEN;
@@ -280,7 +281,7 @@ export async function searchMoviesPaginated(query: string, page: number = 1): Pr
       m.title.toLowerCase().includes(query.toLowerCase()) ||
       m.overview.toLowerCase().includes(query.toLowerCase())
     );
-    return { results: filtered, total_pages: 1 };
+    return { results: filtered, total_pages: 1, total_results: filtered.length };
   }
 
   try {
@@ -296,13 +297,14 @@ export async function searchMoviesPaginated(query: string, page: number = 1): Pr
     const data = await res.json();
     return {
       results: data.results || [],
-      total_pages: data.total_pages || 1
+      total_pages: data.total_pages || 1,
+      total_results: data.total_results || (data.results?.length || 0)
     };
   } catch (error) {
     const filtered = MOCK_MOVIES.filter((m) =>
       m.title.toLowerCase().includes(query.toLowerCase())
     );
-    return { results: filtered, total_pages: 1 };
+    return { results: filtered, total_pages: 1, total_results: filtered.length };
   }
 }
 

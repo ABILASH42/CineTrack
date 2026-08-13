@@ -3,13 +3,22 @@
 import React, { useState } from 'react';
 import { useLibrary } from '@/lib/context/LibraryContext';
 import { CollectionCard } from '@/components/collections/CollectionCard';
-import { Plus, Library as LibraryIcon, Sparkles, FolderPlus, X } from 'lucide-react';
+import { Plus, Library as LibraryIcon, Sparkles, FolderPlus, X, Search } from 'lucide-react';
+import { CustomSelect } from '@/components/ui/CustomSelect';
+
+const COLLECTION_SORT_OPTIONS = [
+  { value: 'newest', label: 'Sort: Newest Created' },
+  { value: 'movies_count', label: 'Sort: Most Movies' },
+  { value: 'title_asc', label: 'Sort: Title (A-Z)' },
+];
 
 export default function CollectionsPage() {
   const { collections, createCollection } = useLibrary();
   const [showModal, setShowModal] = useState(false);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState<'newest' | 'movies_count' | 'title_asc'>('newest');
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,6 +28,25 @@ export default function CollectionsPage() {
     setDescription('');
     setShowModal(false);
   };
+
+  // Filter pipeline
+  let filtered = collections;
+  if (searchQuery.trim()) {
+    const q = searchQuery.toLowerCase();
+    filtered = collections.filter(
+      (col) => col.name.toLowerCase().includes(q) || (col.description || '').toLowerCase().includes(q)
+    );
+  }
+
+  // Sort pipeline
+  const sortedCollections = [...filtered].sort((a, b) => {
+    if (sortBy === 'movies_count') {
+      return (b.item_count || 0) - (a.item_count || 0);
+    } else if (sortBy === 'title_asc') {
+      return a.name.localeCompare(b.name);
+    }
+    return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+  });
 
   return (
     <div className="min-h-screen py-6 sm:py-10 pb-28 sm:pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-10">
@@ -45,12 +73,46 @@ export default function CollectionsPage() {
         </button>
       </div>
 
-      {/* Collections Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-        {collections.map((col) => (
-          <CollectionCard key={col.id} collection={col} />
-        ))}
+      {/* Filter & Search Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
+        <div className="relative flex items-center w-full sm:w-80">
+          <Search className="absolute left-3 w-4 h-4 text-slate-400" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search collections..."
+            className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs font-medium text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-rose-500"
+          />
+        </div>
+
+        <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
+          <CustomSelect
+            value={sortBy}
+            onChange={(val) => setSortBy(val as any)}
+            options={COLLECTION_SORT_OPTIONS}
+          />
+
+          <span className="text-xs font-semibold text-slate-500">
+            {sortedCollections.length} Collections
+          </span>
+        </div>
       </div>
+
+      {/* Collections Grid */}
+      {sortedCollections.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          {sortedCollections.map((col) => (
+            <CollectionCard key={col.id} collection={col} />
+          ))}
+        </div>
+      ) : (
+        <div className="py-16 sm:py-20 flex flex-col items-center justify-center text-center space-y-3">
+          <LibraryIcon className="w-10 h-10 sm:w-12 sm:h-12 text-slate-700" />
+          <p className="text-base sm:text-lg font-bold text-slate-300">No collections found</p>
+          <p className="text-xs text-slate-500">Create a new collection or try a different search keyword.</p>
+        </div>
+      )}
 
       {/* Create Modal */}
       {showModal && (
