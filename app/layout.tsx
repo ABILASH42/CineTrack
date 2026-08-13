@@ -57,6 +57,9 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://cinetrack.app",
   },
+  verification: {
+    google: "UNhWjOMuWvbtqZ0BgHssRJq0Pe9t0rkX6p2aWF56oeE",
+  },
 };
 
 const jsonLd = {
@@ -82,6 +85,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <head>
+        <meta name="google-site-verification" content="UNhWjOMuWvbtqZ0BgHssRJq0Pe9t0rkX6p2aWF56oeE" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
