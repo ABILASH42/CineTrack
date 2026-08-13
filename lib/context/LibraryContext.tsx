@@ -129,6 +129,7 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
     const payload = {
       tmdb_id: movie.id,
       title: movie.title,
+      overview: movie.overview || existing?.overview || null,
       poster_path: movie.poster_path,
       release_date: movie.release_date,
       runtime: movie.runtime || 120,
@@ -140,20 +141,35 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
     };
 
     if (user) {
-      const { data, error } = await supabase
+      let { data, error } = await supabase
         .from('user_movies')
         .upsert({ ...payload, user_id: user.id }, { onConflict: 'user_id,tmdb_id' })
         .select()
         .single();
 
       if (error) {
-        console.error('Error updating watchlist in Supabase:', error);
+        // Fallback for Supabase tables missing newly added overview / vote_average columns
+        const { tmdb_id, title, poster_path, release_date, runtime, status, rating, review, updated_at } = payload;
+        const fallbackPayload = { tmdb_id, title, poster_path, release_date, runtime, status, rating, review, updated_at, user_id: user.id };
+        const res = await supabase
+          .from('user_movies')
+          .upsert(fallbackPayload, { onConflict: 'user_id,tmdb_id' })
+          .select()
+          .single();
+
+        if (res.data) {
+          data = res.data;
+          error = null;
+        } else if (res.error) {
+          console.error('Error updating watchlist in Supabase:', res.error.message || res.error);
+        }
       }
-      
-      const newLog: UserMovieLog = data || {
-        id: existing?.id || `db-${Date.now()}`,
+
+      const newLog: UserMovieLog = {
+        id: data?.id || existing?.id || `db-${Date.now()}`,
         user_id: user.id,
         ...payload,
+        ...(data || {}),
         created_at: existing?.created_at || now,
       };
 

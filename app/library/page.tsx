@@ -113,7 +113,7 @@ export default function LibraryPage() {
               movie={{
                 id: log.tmdb_id,
                 title: log.title,
-                overview: log.review || '',
+                overview: log.overview || log.review || '',
                 poster_path: log.poster_path,
                 backdrop_path: null,
                 release_date: log.release_date,

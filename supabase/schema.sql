@@ -28,9 +28,11 @@ create table if not exists public.user_movies (
   user_id uuid references public.profiles(id) on delete cascade not null,
   tmdb_id integer not null,
   title text not null,
+  overview text,
   poster_path text,
   release_date text,
   runtime integer default 120,
+  vote_average numeric(3, 1),
   status text check (status in ('plan_to_watch', 'watching', 'completed', 'dropped')) not null,
   rating numeric(3, 1) check (rating >= 0 and rating <= 10),
   review text,
@@ -38,6 +40,10 @@ create table if not exists public.user_movies (
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null,
   unique(user_id, tmdb_id)
 );
+
+-- Migration for existing database tables
+alter table public.user_movies add column if not exists overview text;
+alter table public.user_movies add column if not exists vote_average numeric(3, 1);
 
 -- Enable RLS for user_movies
 alter table public.user_movies enable row level security;

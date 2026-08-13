@@ -36,6 +36,10 @@ export function MovieModal({ movieId, onClose }: MovieModalProps) {
       if (existingLog) {
         setUserRating(existingLog.rating || 0);
         setUserReview(existingLog.review || '');
+
+        if (data && (!existingLog.overview || !existingLog.vote_average)) {
+          addOrUpdateMovieStatus(data, existingLog.status, existingLog.rating || undefined, existingLog.review || undefined);
+        }
       } else {
         setUserRating(0);
         setUserReview('');
