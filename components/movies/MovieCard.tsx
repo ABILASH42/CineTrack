@@ -82,17 +82,19 @@ export function MovieCard({ movie, onSelect }: MovieCardProps) {
           <div className="w-full">
             <button
               onClick={handleQuickAction}
-              className={`w-full py-1.5 sm:py-2 px-2 sm:px-3 rounded-xl text-[10px] sm:text-xs font-semibold flex items-center justify-center gap-1 transition-all shadow-md active:scale-95 ${
+              className={`group/cardbtn w-full py-1.5 sm:py-2 px-2 sm:px-3 rounded-xl text-[10px] sm:text-xs font-semibold flex items-center justify-center gap-1 transition-all shadow-md active:scale-95 ${
                 log?.status
-                  ? 'bg-rose-500/30 text-rose-200 hover:bg-rose-600 hover:text-white border border-rose-500/40 backdrop-blur-md'
+                  ? 'bg-emerald-500/30 text-emerald-200 border border-emerald-500/40 hover:bg-rose-600 hover:text-white hover:border-rose-500 backdrop-blur-md'
                   : 'bg-white/20 text-white hover:bg-rose-600 hover:shadow-rose-600/30 backdrop-blur-md'
               }`}
-              title={log?.status ? 'Remove from Watchlist & Library' : 'Add to Watchlist'}
+              title={log?.status ? 'Click to Remove from Watchlist' : 'Add to Watchlist'}
             >
               {log?.status ? (
                 <>
-                  <Trash2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-rose-400" />
-                  <span className="truncate">Remove</span>
+                  <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-300 group-hover/cardbtn:hidden" />
+                  <Trash2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white hidden group-hover/cardbtn:inline-block" />
+                  <span className="truncate group-hover/cardbtn:hidden">In Watchlist</span>
+                  <span className="truncate hidden group-hover/cardbtn:inline">Remove</span>
                 </>
               ) : (
                 <>

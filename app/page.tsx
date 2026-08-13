@@ -6,14 +6,15 @@ import { Movie } from '@/types/movie';
 import { fetchTrendingMovies, fetchPopularMovies } from '@/lib/tmdb';
 import { MovieCard } from '@/components/movies/MovieCard';
 import { MovieModal } from '@/components/movies/MovieModal';
-import { Sparkles, Flame, Trophy, Play, Star, Plus, Film, Trash2 } from 'lucide-react';
+import { Sparkles, Flame, Trophy, Play, Star, Plus, Film, Trash2, Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getTMDBImageUrl } from '@/lib/tmdb';
 import { useLibrary } from '@/lib/context/LibraryContext';
 
 export default function HomePage() {
   const [trending, setTrending] = useState<Movie[]>([]);
   const [popular, setPopular] = useState<Movie[]>([]);
-  const [heroMovie, setHeroMovie] = useState<Movie | null>(null);
+  const [heroIndex, setHeroIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
   const [selectedMovieId, setSelectedMovieId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -27,13 +28,31 @@ export default function HomePage() {
       ]);
       setTrending(trendData);
       setPopular(popData);
-      if (trendData.length > 0) {
-        setHeroMovie(trendData[0]);
-      }
       setLoading(false);
     }
     loadData();
   }, []);
+
+  const topHeroMovies = trending.slice(0, 5);
+  const heroMovie = topHeroMovies[heroIndex] || (trending[0] ?? null);
+
+  useEffect(() => {
+    if (topHeroMovies.length <= 1 || isPaused) return;
+    const interval = setInterval(() => {
+      setHeroIndex((prev) => (prev + 1) % topHeroMovies.length);
+    }, 6000);
+    return () => clearInterval(interval);
+  }, [topHeroMovies.length, isPaused]);
+
+  const handlePrevSlide = () => {
+    if (topHeroMovies.length === 0) return;
+    setHeroIndex((prev) => (prev === 0 ? topHeroMovies.length - 1 : prev - 1));
+  };
+
+  const handleNextSlide = () => {
+    if (topHeroMovies.length === 0) return;
+    setHeroIndex((prev) => (prev + 1) % topHeroMovies.length);
+  };
 
   const heroLog = heroMovie ? getMovieLog(heroMovie.id) : undefined;
 
@@ -48,17 +67,22 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen pb-28 sm:pb-20">
-      {/* Hero Showcase Section */}
+      {/* Hero Showcase Carousel */}
       {heroMovie && (
-        <section className="relative w-full min-h-[440px] sm:min-h-[520px] lg:h-[82vh] flex items-end overflow-hidden bg-slate-950">
-          {/* Backdrop Image */}
+        <section
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+          className="relative w-full min-h-[440px] sm:min-h-[520px] lg:h-[82vh] flex items-end overflow-hidden bg-slate-950 group/hero"
+        >
+          {/* Backdrop Image with Key Fade Transition */}
           <Image
+            key={heroMovie.id}
             src={getTMDBImageUrl(heroMovie.backdrop_path || heroMovie.poster_path, 'original')}
             alt={heroMovie.title}
             fill
             priority
             sizes="100vw"
-            className="object-cover opacity-75 sm:opacity-85 scale-105 filter brightness-100 animate-fadeIn"
+            className="object-cover opacity-75 sm:opacity-85 scale-105 filter brightness-100 transition-opacity duration-700 animate-fadeIn"
           />
 
           {/* Vignette Gradients for Legibility */}
@@ -67,9 +91,9 @@ export default function HomePage() {
 
           {/* Hero Content Overlay */}
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:pb-16 w-full flex items-end justify-between gap-8">
-            <div className="max-w-2xl space-y-3 sm:space-y-4">
+            <div key={heroMovie.id} className="max-w-2xl space-y-3 sm:space-y-4 animate-fadeIn">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/20 border border-rose-500/30 text-rose-300 text-[10px] sm:text-xs font-bold tracking-wider uppercase backdrop-blur-md shadow-md">
-                <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-rose-400" /> Featured Spotlight
+                <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-rose-400" /> Featured Spotlight #{heroIndex + 1}
               </div>
 
               <h1 className="text-2xl xs:text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-tight sm:leading-none drop-shadow-xl">
@@ -98,16 +122,18 @@ export default function HomePage() {
 
                 <button
                   onClick={handleHeroWatchlistToggle}
-                  className={`px-6 py-3 rounded-2xl border text-xs font-bold flex items-center justify-center gap-2 backdrop-blur-md active:scale-95 transition-all shrink-0 ${
+                  className={`group/watchbtn w-[160px] sm:w-[170px] py-3 rounded-2xl border text-xs font-bold flex items-center justify-center gap-2 backdrop-blur-md active:scale-95 transition-all shrink-0 ${
                     heroLog?.status
-                      ? 'bg-rose-500/20 text-rose-300 border-rose-500/40 hover:bg-rose-500/30'
+                      ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 hover:bg-rose-600 hover:text-white hover:border-rose-500 shadow-md'
                       : 'bg-white/10 hover:bg-white/20 text-white border-white/20'
                   }`}
                 >
                   {heroLog?.status ? (
                     <>
-                      <Trash2 className="w-4 h-4 text-rose-400" />
-                      <span>Remove from Watchlist</span>
+                      <Check className="w-4 h-4 text-emerald-400 group-hover/watchbtn:hidden" />
+                      <Trash2 className="w-4 h-4 text-white hidden group-hover/watchbtn:inline-block" />
+                      <span className="group-hover/watchbtn:hidden">In Watchlist</span>
+                      <span className="hidden group-hover/watchbtn:inline">Remove</span>
                     </>
                   ) : (
                     <>
@@ -119,6 +145,44 @@ export default function HomePage() {
               </div>
             </div>
           </div>
+
+          {/* Crunchyroll-style Bottom Slider Navigation Bar */}
+          {topHeroMovies.length > 1 && (
+            <div className="absolute bottom-3 right-4 sm:bottom-6 sm:right-6 z-20 flex items-center gap-1.5 sm:gap-2 bg-black/60 backdrop-blur-xl p-1.5 sm:p-2 rounded-2xl border border-white/10 shadow-2xl">
+              <button
+                onClick={handlePrevSlide}
+                className="p-1.5 rounded-xl hover:bg-white/20 text-white transition-colors active:scale-95"
+                title="Previous Featured Movie"
+              >
+                <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+              </button>
+
+              <div className="flex items-center gap-1 sm:gap-1.5 px-1">
+                {topHeroMovies.map((movie, idx) => (
+                  <button
+                    key={movie.id}
+                    onClick={() => setHeroIndex(idx)}
+                    className={`transition-all flex items-center justify-center rounded-xl w-7 h-7 sm:w-8 sm:h-8 text-[10px] sm:text-xs font-bold active:scale-95 ${
+                      idx === heroIndex
+                        ? 'bg-rose-600 text-white shadow-lg shadow-rose-600/40 ring-1 ring-white/30'
+                        : 'bg-white/10 hover:bg-white/20 text-slate-300'
+                    }`}
+                    title={movie.title}
+                  >
+                    0{idx + 1}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                onClick={handleNextSlide}
+                className="p-1.5 rounded-xl hover:bg-white/20 text-white transition-colors active:scale-95"
+                title="Next Featured Movie"
+              >
+                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+              </button>
+            </div>
+          )}
         </section>
       )}
 

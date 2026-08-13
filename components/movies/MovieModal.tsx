@@ -238,11 +238,13 @@ export function MovieModal({ movieId, onClose }: MovieModalProps) {
                 {existingLog && (
                   <button
                     onClick={handleRemoveFromWatchlist}
-                    className="px-2.5 py-2 rounded-xl text-[11px] sm:text-xs font-bold flex items-center justify-center gap-1 sm:gap-1.5 bg-rose-500/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/40 transition-all active:scale-95 shrink-0"
-                    title="Remove from Watchlist & Library"
+                    className="group/modalremove px-2.5 py-2 rounded-xl text-[11px] sm:text-xs font-bold flex items-center justify-center gap-1 sm:gap-1.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-rose-600 hover:text-white hover:border-rose-500 transition-all active:scale-95 shrink-0"
+                    title="Click to Remove from Watchlist & Library"
                   >
-                    <Trash2 className="w-3.5 h-3.5 shrink-0 text-rose-400" />
-                    <span className="truncate">Remove</span>
+                    <Check className="w-3.5 h-3.5 shrink-0 text-emerald-400 group-hover/modalremove:hidden" />
+                    <Trash2 className="w-3.5 h-3.5 shrink-0 text-white hidden group-hover/modalremove:inline-block" />
+                    <span className="truncate group-hover/modalremove:hidden">In Watchlist</span>
+                    <span className="truncate hidden group-hover/modalremove:inline">Remove</span>
                   </button>
                 )}
               </div>
