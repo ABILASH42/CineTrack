@@ -55,7 +55,7 @@ export default function CollectionsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4 sm:pb-6">
         <div>
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/20 text-rose-300 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1.5 sm:mb-2">
-            <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> Crunchyroll Custom Lists
+            <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> Custom Movie Lists
           </div>
           <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
             Movie Collections

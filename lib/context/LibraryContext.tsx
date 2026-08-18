@@ -269,7 +269,7 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
         user_id: user.id,
         name,
         description: description || null,
-        is_public: true,
+        is_public: false,
         posters: []
       })
       .select()

@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Collection } from '@/types/movie';
 import { getTMDBImageUrl } from '@/lib/tmdb';
-import { Film, Lock, Globe, Layers } from 'lucide-react';
+import { Film, Layers } from 'lucide-react';
 
 interface CollectionCardProps {
   collection: Collection;
@@ -39,13 +39,6 @@ export function CollectionCard({ collection }: CollectionCardProps) {
             <span className="text-[11px] sm:text-xs font-semibold">Empty Collection</span>
           </div>
         )}
-
-        <div className="absolute top-2 right-2 sm:top-2.5 sm:right-2.5 z-10">
-          <span className="bg-black/75 backdrop-blur-md text-slate-300 text-[9px] sm:text-[10px] font-bold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full border border-white/10 flex items-center gap-1 shadow-md">
-            {collection.is_public ? <Globe className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-sky-400" /> : <Lock className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-amber-400" />}
-            {collection.is_public ? 'Public' : 'Private'}
-          </span>
-        </div>
       </div>
 
       {/* Collection Title & Meta */}

@@ -165,7 +165,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Crunchyroll-style Bottom Slider Navigation Bar aligned on same bottom baseline */}
+            {/* Bottom Slider Navigation Bar aligned on same bottom baseline */}
             {topHeroMovies.length > 1 && (
               <div className="shrink-0 flex items-center gap-1.5 sm:gap-2 bg-black/75 backdrop-blur-xl p-1.5 sm:p-2 rounded-2xl border border-white/15 shadow-2xl self-start md:self-end">
                 <button

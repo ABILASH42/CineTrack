@@ -38,13 +38,6 @@ export default function CollectionDetailPage() {
         </Link>
 
         <div className="p-5 sm:p-8 rounded-3xl bg-slate-900/80 border border-white/10 space-y-2.5 sm:space-y-3 backdrop-blur-xl">
-          <div className="flex items-center gap-2">
-            <span className="bg-rose-500/20 text-rose-300 text-[10px] sm:text-xs font-bold px-2.5 py-1 rounded-full border border-rose-500/30 flex items-center gap-1">
-              {collection.is_public ? <Globe className="w-3 h-3 text-sky-400" /> : <Lock className="w-3 h-3 text-amber-400" />}
-              {collection.is_public ? 'Public Collection' : 'Private Collection'}
-            </span>
-          </div>
-
           <h1 className="text-2xl xs:text-3xl sm:text-5xl font-black text-white tracking-tight">
             {collection.name}
           </h1>
