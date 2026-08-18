@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import { Star, Plus, Check, Bookmark, Eye, Trash2 } from 'lucide-react';
 import { Movie, WatchStatus } from '@/types/movie';
-import { getTMDBImageUrl } from '@/lib/tmdb';
+import { getTMDBImageUrl, MOCK_MOVIES } from '@/lib/tmdb';
 import { useLibrary } from '@/lib/context/LibraryContext';
 
 interface MovieCardProps {
@@ -17,7 +17,13 @@ export function MovieCard({ movie, onSelect }: MovieCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const log = getMovieLog(movie.id);
 
-  const voteAverage = (movie.vote_average && movie.vote_average > 0) ? movie.vote_average : log?.vote_average;
+  const mockMovie = MOCK_MOVIES.find((m) => m.id === movie.id);
+  const rawVote = (typeof movie.vote_average === 'number' && movie.vote_average > 0)
+    ? movie.vote_average
+    : (typeof log?.vote_average === 'number' && log.vote_average > 0
+        ? log.vote_average
+        : mockMovie?.vote_average);
+  const displayVoteAverage = typeof rawVote === 'number' && rawVote > 0 ? rawVote.toFixed(1) : 'N/A';
   const overviewText = (movie.overview && movie.overview.trim().length > 0) ? movie.overview : log?.overview;
 
   const getStatusBadge = (status?: WatchStatus) => {
@@ -63,7 +69,7 @@ export function MovieCard({ movie, onSelect }: MovieCardProps) {
         <div className="absolute top-1.5 sm:top-2.5 left-1.5 sm:left-2.5 right-1.5 sm:right-2.5 flex items-center justify-between pointer-events-none z-10 gap-1">
           <div className="flex items-center gap-1 bg-black/80 backdrop-blur-md text-amber-400 text-[10px] sm:text-xs font-bold px-2 py-0.5 sm:py-1 rounded-full border border-white/10 shadow-lg" title="TMDB Rating">
             <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-amber-400 text-amber-400 shrink-0" />
-            <span>{voteAverage ? voteAverage.toFixed(1) : 'N/A'}</span>
+            <span>{displayVoteAverage}</span>
           </div>
 
           {log?.status && getStatusBadge(log.status)}

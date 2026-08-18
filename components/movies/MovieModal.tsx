@@ -157,7 +157,7 @@ export function MovieModal({ movieId, onClose }: MovieModalProps) {
                     <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-1.5 sm:mt-2 text-[11px] sm:text-xs font-semibold text-slate-300">
                       <span className="flex items-center gap-1 text-amber-400 bg-amber-400/10 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md border border-amber-400/20">
                         <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-amber-400" />
-                        {movie.vote_average?.toFixed(1)} / 10
+                        {(typeof movie.vote_average === 'number' && movie.vote_average > 0 ? movie.vote_average.toFixed(1) : (existingLog?.vote_average ? existingLog.vote_average.toFixed(1) : 'N/A'))} / 10
                       </span>
                       {movie.release_date && (
                         <span className="flex items-center gap-1">

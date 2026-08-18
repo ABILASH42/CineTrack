@@ -4,6 +4,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { UserMovieLog, Collection, WatchStatus, Movie } from '@/types/movie';
 import { supabase } from '@/lib/supabase/client';
 import { User } from '@supabase/supabase-js';
+import { MOCK_MOVIES, fetchMovieDetails } from '@/lib/tmdb';
 
 export interface UserProfile {
   id: string;
@@ -94,7 +95,54 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
         .eq('user_id', userId)
         .order('updated_at', { ascending: false });
 
-      if (movies) setUserMovies(movies);
+      if (movies) {
+        const initialEnriched = movies.map((m) => {
+          if (!m.vote_average) {
+            const mock = MOCK_MOVIES.find((x) => x.id === m.tmdb_id);
+            if (mock?.vote_average) {
+              return { ...m, vote_average: mock.vote_average };
+            }
+          }
+          return m;
+        });
+        setUserMovies(initialEnriched);
+
+        // Background revalidation: fetch live details from TMDB to keep ratings fresh & updated
+        if (initialEnriched.length > 0) {
+          Promise.all(
+            initialEnriched.map(async (m) => {
+              try {
+                const details = await fetchMovieDetails(m.tmdb_id);
+                if (details) {
+                  const latestVote = details.vote_average || m.vote_average || null;
+                  const latestOverview = m.overview || details.overview || null;
+                  if (latestVote !== m.vote_average || latestOverview !== m.overview) {
+                    if (userId) {
+                      await supabase
+                        .from('user_movies')
+                        .update({ vote_average: latestVote, overview: latestOverview })
+                        .eq('user_id', userId)
+                        .eq('tmdb_id', m.tmdb_id);
+                    }
+                    return { ...m, vote_average: latestVote, overview: latestOverview };
+                  }
+                }
+              } catch (e) {
+                // ignore error
+              }
+              return m;
+            })
+          ).then((revalidated) => {
+            const map = new Map(revalidated.map((x) => [x.tmdb_id, x]));
+            setUserMovies((prev) =>
+              prev.map((item) => {
+                const updated = map.get(item.tmdb_id);
+                return updated ? { ...item, ...updated } : item;
+              })
+            );
+          });
+        }
+      }
 
       // Fetch User Collections (only own collections or public ones for current user)
       const { data: cols } = await supabase
@@ -128,6 +176,22 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
 
     const existing = userMovies.find((m) => m.tmdb_id === movie.id);
     const now = new Date().toISOString();
+    const mockMatch = MOCK_MOVIES.find((m) => m.id === movie.id);
+
+    let voteAvg = (typeof movie.vote_average === 'number' && movie.vote_average > 0)
+      ? movie.vote_average
+      : (existing?.vote_average || mockMatch?.vote_average || null);
+
+    if (!voteAvg) {
+      try {
+        const details = await fetchMovieDetails(movie.id);
+        if (details?.vote_average) {
+          voteAvg = details.vote_average;
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
 
     const payload = {
       tmdb_id: movie.id,
@@ -136,7 +200,7 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
       poster_path: movie.poster_path,
       release_date: movie.release_date,
       runtime: movie.runtime || 120,
-      vote_average: movie.vote_average || (existing?.vote_average ?? null),
+      vote_average: voteAvg,
       status,
       rating: rating !== undefined ? rating : (existing?.rating ?? null),
       review: review !== undefined ? review : (existing?.review ?? null),
@@ -151,11 +215,11 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
 
     if (error) {
       // Fallback for Supabase tables missing newly added overview / vote_average columns
-      const { tmdb_id, title, poster_path, release_date, runtime, status, rating, review, updated_at } = payload;
+      const { tmdb_id, title, poster_path, release_date, runtime, status, rating, review, updated_at, overview } = payload;
       const fallbackPayload = { tmdb_id, title, poster_path, release_date, runtime, status, rating, review, updated_at, user_id: user.id };
       const res = await supabase
         .from('user_movies')
-        .upsert(fallbackPayload, { onConflict: 'user_id,tmdb_id' })
+        .upsert({ ...fallbackPayload, vote_average: voteAvg, overview }, { onConflict: 'user_id,tmdb_id' })
         .select()
         .single();
 

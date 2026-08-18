@@ -9,6 +9,8 @@ import { BookmarkCheck, Eye, Check, Clock, Star, Flame, Sparkles, Search } from 
 import { formatMinutesToHours } from '@/lib/utils';
 import { CustomSelect } from '@/components/ui/CustomSelect';
 
+import { MOCK_MOVIES } from '@/lib/tmdb';
+
 const LIBRARY_SORT_OPTIONS = [
   { value: 'updated', label: 'Recently Updated' },
   { value: 'rating_desc', label: 'Rating (High to Low)' },
@@ -26,6 +28,10 @@ export default function LibraryPage() {
 
   const stats = getWatchStats();
 
+  const getEffectiveRating = (m: (typeof userMovies)[0]) => {
+    return m.rating || m.vote_average || MOCK_MOVIES.find((x) => x.id === m.tmdb_id)?.vote_average || 0;
+  };
+
   // Filter pipeline
   let filtered = activeTab === 'all'
     ? userMovies
@@ -38,22 +44,22 @@ export default function LibraryPage() {
 
   if (ratingFilter !== 'all') {
     if (ratingFilter === '9') {
-      filtered = filtered.filter((m) => (m.rating || 0) >= 9);
+      filtered = filtered.filter((m) => getEffectiveRating(m) >= 9);
     } else if (ratingFilter === '7') {
-      filtered = filtered.filter((m) => (m.rating || 0) >= 7);
+      filtered = filtered.filter((m) => getEffectiveRating(m) >= 7);
     } else if (ratingFilter === '5') {
-      filtered = filtered.filter((m) => (m.rating || 0) >= 5);
+      filtered = filtered.filter((m) => getEffectiveRating(m) >= 5);
     } else if (ratingFilter === 'unrated') {
-      filtered = filtered.filter((m) => !m.rating);
+      filtered = filtered.filter((m) => !m.rating && !m.vote_average);
     }
   }
 
   // Sorting pipeline
   const sortedMovies = [...filtered].sort((a, b) => {
     if (sortBy === 'rating_desc') {
-      return (b.rating || 0) - (a.rating || 0);
+      return getEffectiveRating(b) - getEffectiveRating(a);
     } else if (sortBy === 'rating_asc') {
-      return (a.rating || 0) - (b.rating || 0);
+      return getEffectiveRating(a) - getEffectiveRating(b);
     } else if (sortBy === 'title_asc') {
       return a.title.localeCompare(b.title);
     }
@@ -207,7 +213,7 @@ export default function LibraryPage() {
                 poster_path: log.poster_path,
                 backdrop_path: null,
                 release_date: log.release_date,
-                vote_average: log.vote_average ?? 0,
+                vote_average: log.vote_average || MOCK_MOVIES.find((x) => x.id === log.tmdb_id)?.vote_average || 0,
                 runtime: log.runtime,
               }}
               onSelect={(m) => setSelectedMovieId(m.id)}
