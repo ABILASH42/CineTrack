@@ -28,8 +28,17 @@ export default function LibraryPage() {
 
   const stats = getWatchStats();
 
+  const getTMDBRating = (m: (typeof userMovies)[0]) => {
+    return (typeof m.vote_average === 'number' && m.vote_average > 0)
+      ? m.vote_average
+      : (MOCK_MOVIES.find((x) => x.id === m.tmdb_id)?.vote_average || 0);
+  };
+
   const getEffectiveRating = (m: (typeof userMovies)[0]) => {
-    return m.rating || m.vote_average || MOCK_MOVIES.find((x) => x.id === m.tmdb_id)?.vote_average || 0;
+    if (activeTab === 'plan_to_watch') {
+      return getTMDBRating(m);
+    }
+    return m.rating || getTMDBRating(m);
   };
 
   // Filter pipeline
